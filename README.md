@@ -27,16 +27,18 @@ To get familiar with the pattern:
 Create the initializer with the following content:
 
 ``` rb
-RailsTransactionalOutbox.configure do |config|
-  config.database_connection_provider = ActiveRecord::Base # required 
-  config.transaction_provider = ActiveRecord::Base # required
-  config.logger = Rails.logger # required
-  config.outbox_model = OutboxEntry # required
-  config.error_handler = Sentry # required
-  
-  config.transactional_outbox_worker_sleep_seconds = 1 # optional, defaults to 0.5
-  config.outbox_batch_size = 100 # optional, defaults to 100
-  config.add_record_processor(MyCustomOperationProcerssor) # optional, by default it contains only one processor for ActiveRecord, but you could add more
+Rails.application.config.to_prepare do
+  RailsTransactionalOutbox.configure do |config|
+    config.database_connection_provider = ActiveRecord::Base # required 
+    config.transaction_provider = ActiveRecord::Base # required
+    config.logger = Rails.logger # required
+    config.outbox_model = OutboxEntry # required
+    config.error_handler = Sentry # required
+    
+    config.transactional_outbox_worker_sleep_seconds = 1 # optional, defaults to 0.5
+    config.outbox_batch_size = 100 # optional, defaults to 100
+    config.add_record_processor(MyCustomOperationProcerssor) # optional, by default it contains only one processor for ActiveRecord, but you could add more
+  end
 end
 ```
 
