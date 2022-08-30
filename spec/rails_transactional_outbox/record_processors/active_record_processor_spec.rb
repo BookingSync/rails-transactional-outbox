@@ -31,7 +31,7 @@ RSpec.describe RailsTransactionalOutbox::RecordProcessors::ActiveRecordProcessor
     subject(:call) { described_class.new.call(record) }
 
     let(:record) do
-      OutboxEntry.new(resource_id: resource_id, resource_class: "User", changeset: changeset,
+      OutboxWithEncryptionEntry.new(resource_id: resource_id, resource_class: "User", changeset: changeset,
         event_name: "user_created", id: 123)
     end
     let(:changeset) do
