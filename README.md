@@ -174,7 +174,9 @@ end
 
 If you want to extent the behavior of `ActiveRecordProcessor`, you could actually create a new processor that handles exactly the same context as multiple processors can be used for the same context.
 
-When adding a custom processor for service objects/operations, you might want to use `arguments` column, to keep all the arguments there. 
+When adding a custom processor for service objects/operations, you might want to use `arguments` column, to keep all the arguments there.
+
+If you use encryption and you want to deal with properly deserialized hash, you `transformed_changeset` and `transformed_arguments` methods (like `ActiveRecordProcessor` does.)
 
 When dealing with custom service objects, remember to create OutboxEntry records inside the same transaction:
 
