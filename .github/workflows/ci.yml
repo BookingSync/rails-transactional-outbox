@@ -18,13 +18,16 @@ jobs:
       matrix:
         ruby: [ '2.7', '3.0', '3.1' ]
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/rails-transactional-outbox-test"
+      POSTGRES_URL: "postgresql://postgres:postgres@127.0.0.1:5432"
     services:
       postgres:
         image: postgres:14
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: hermes-rb-test
+          POSTGRES_DB: rails-transactional-outbox-test
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
