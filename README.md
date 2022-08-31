@@ -260,6 +260,16 @@ Available events and arguments are:
 - "rails_transactional_outbox.heartbeat", no arguments
 
 
+#### Testing the logic from reliable_after_commit callbacks
+
+The fastest way to handle it would be to add this to `rails_helper.rb`:
+
+``` ruby
+ApplicationRecord.after_commit do
+  RailsTransactionalOutbox::OutboxEntriesProcessor.new.call
+end
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
