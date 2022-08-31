@@ -1,0 +1,150 @@
+require:
+  - rubocop-performance
+  - rubocop-rspec
+  - rubocop-rake
+
+inherit_mode:
+  merge:
+    - Exclude
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 2.7
+  Exclude:
+    - "db/**/*"
+    - "bin/**/*"
+    - "tmp/**/*"
+    - "log/**/*"
+    - "vendor/**/*"
+    - "spec/rails_helper.rb"
+
+Layout/ArgumentAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/ArrayAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/EmptyLineBetweenDefs:
+  AllowAdjacentOneLineDefs: true
+
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
+Layout/FirstArgumentIndentation:
+  EnforcedStyle: consistent
+
+Layout/FirstArrayElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+Layout/ParameterAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/SpaceBeforeBrackets:
+  Enabled: false
+
+Lint/UnusedMethodArgument:
+  AllowUnusedKeywordArguments: true
+
+Metrics/ParameterLists:
+  MaxOptionalParameters: 4
+
+RSpec/ExpectChange:
+  EnforcedStyle: block
+
+RSpec/LetSetup:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Max: 20
+
+Style/Alias:
+  EnforcedStyle: prefer_alias_method
+
+Style/ClassAndModuleChildren:
+  EnforcedStyle: nested
+
+Style/CommandLiteral:
+  EnforcedStyle: percent_x
+
+Style/RescueStandardError:
+  EnforcedStyle: implicit
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+  ConsistentQuotesInMultiline: true
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/RaiseArgs:
+  EnforcedStyle: compact
+
+Style/RegexpLiteral:
+  EnforcedStyle: percent_r
+
+Style/Documentation:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Max: 10
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - 'spec/**/*'
+
+Naming/FileName:
+  Exclude:
+    - 'lib/rails-transactional-outbox.rb'
+
+RSpec/ExampleLength:
+  Max: 15
+
+Metrics/AbcSize:
+  Exclude:
+    - 'lib/rails_transactional_outbox/runner.rb'
+    - 'lib/rails_transactional_outbox/outbox_entries_processor.rb'
+
+Metrics/MethodLength:
+  Max: 20
+  Exclude:
+    - 'lib/rails_transactional_outbox/runner.rb'
+
+RSpec/DescribeClass:
+  Exclude:
+    - 'spec/integration_spec.rb'
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
+Lint/EmptyClass:
+  Exclude:
+    - 'lib/rails_transactional_outbox/error_handlers.rb'
+    - 'lib/rails_transactional_outbox/record_processors.rb'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/rails_transactional_outbox/reliable_model.rb'
+
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - 'spec/spec_helper.rb'
+
+RSpec/AnyInstance:
+  Exclude:
+    - 'spec/rails_transactional_outbox/outbox_model_spec.rb'
+
+RSpec/VerifiedDoubles:
+  Exclude:
+    - 'spec/rails_transactional_outbox/runner_spec.rb'
