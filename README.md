@@ -33,7 +33,7 @@ Rails.application.config.to_prepare do
     config.transaction_provider = ActiveRecord::Base # required
     config.logger = Rails.logger # required
     config.outbox_model = OutboxEntry # required
-    config.error_handler = Sentry # required
+    config.error_handler = Sentry # non-required, but highly recommended, defaults to RailsTransactionalOutbox::ErrorHandlers::NullErrorHandler
     
     config.transactional_outbox_worker_sleep_seconds = 1 # optional, defaults to 0.5
     config.transactional_outbox_worker_idle_delay_multiplier = 5 # optional, defaults to 1, if there are no outbox entries to be processed, then the sleep time for the thread will be equal to transactional_outbox_worker_idle_delay_multiplier * transactional_outbox_worker_sleep_seconds  
