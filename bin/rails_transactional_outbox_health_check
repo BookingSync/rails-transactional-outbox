@@ -7,6 +7,6 @@ result = RailsTransactionalOutbox::HealthCheck.check
 if result.empty?
   exit 0
 else
-  RailsTransactionalOutbox.configuration.logger.fatal "[Rails Transactional Outbox Worker] health check failed: #{result}"
+  Rails.logger.fatal "[Rails Transactional Outbox Worker] health check failed: #{result}"
   exit 1
 end
