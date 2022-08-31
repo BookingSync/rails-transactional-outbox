@@ -149,7 +149,8 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
           outbox_record: instance_of(OutboxEntry)).exactly(2)
       end
 
-      it "sleeps for a specific amount of time after processing determined by RailsTransactionalOutbox::RunnerSleepInterval" do
+      it "sleeps for a specific amount of time after processing determined
+      by RailsTransactionalOutbox::RunnerSleepInterval" do
         expect(RailsTransactionalOutbox::RunnerSleepInterval).to have_received(:interval_for)
       end
     end
