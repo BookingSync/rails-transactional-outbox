@@ -112,6 +112,12 @@ When executing the callbacks, you can use `previous_changes` which will contain 
 
 Inclusion of this module will result in OutboxEntry records being created after create/update/destroy. For these entries, the `context` column will be populated with `active_record` value.
 
+### Ordering issues
+
+The order will be preserved only if there is no concurrency (i.e. a single process with a single thread). Internally, `.lock("FOR UPDATE SKIP LOCKED")` is used to avoid conflicts and other issues related to concurrency, but at the cost of no longer preserving the order of outbox entries.
+
+Future releases might address that issue with some extra topics/queues where the ordering will be preserved.
+
 ### Custom processors
 
 If you want to add some custom processor either for ActiveRecord or for custom service objects, create an object inheriting from `RailsTransactionalOutbox::RecordProcessors::BaseProcessor`, which has the following interface:
