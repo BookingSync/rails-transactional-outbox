@@ -51,3 +51,4 @@ class RailsTransactionalOutbox
 end
 
 RailsTransactionalOutbox.loader.setup
+require "rails_transactional_outbox/railtie" if defined?(Rails)
