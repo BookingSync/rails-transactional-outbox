@@ -22,11 +22,9 @@ class RailsTransactionalOutbox
           log("shutting down")
           break
         end
-        process_entries
+        entries = process_entries
         instrument("rails_transactional_outbox.heartbeat")
-        # TODO: maybe apply some backoff or longer pause if there were no entries to be processed?
-        # doesn't make much sense to keep querying the DB if there is nothing there
-        sleep transactional_outbox_worker_sleep_seconds
+        sleep sleep_interval_for(entries)
       end
     rescue => e
       error_handler.capture_exception(e)
@@ -43,8 +41,8 @@ class RailsTransactionalOutbox
 
     private
 
-    delegate :error_handler, :transactional_outbox_worker_sleep_seconds, :database_connection_provider,
-      :logger, to: :config
+    delegate :error_handler, :transactional_outbox_worker_sleep_seconds,
+      :transactional_outbox_worker_idle_delay_multiplier, :database_connection_provider, :logger, to: :config
     delegate :monitor, to: RailsTransactionalOutbox
 
     def process_entries
@@ -98,6 +96,11 @@ class RailsTransactionalOutbox
       else
         RailsTransactionalOutbox::Tracers::NullTracer
       end
+    end
+
+    def sleep_interval_for(entries)
+      RailsTransactionalOutbox::RunnerSleepInterval.interval_for(entries, transactional_outbox_worker_sleep_seconds,
+        transactional_outbox_worker_idle_delay_multiplier)
     end
   end
 end

@@ -10,6 +10,8 @@ class RailsTransactionalOutbox
     end
 
     def call
+      return [] unless outbox_model.any_records_to_process?
+
       transaction do
         outbox_model.fetch_processable(outbox_batch_size).to_a.tap do |records_to_process|
           failed_records = Concurrent::Array.new

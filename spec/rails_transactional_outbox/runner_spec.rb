@@ -122,6 +122,7 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
 
     context "when no error happens" do
       before do
+        allow(RailsTransactionalOutbox::RunnerSleepInterval).to receive(:interval_for).and_call_original
         Thread.new { start }
         sleep 0.5
       end
@@ -146,6 +147,10 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
         expect(monitor).to have_received(:instrument).with("rails_transactional_outbox.heartbeat").at_least(:once)
         expect(monitor).to have_received(:instrument).with("rails_transactional_outbox.record_processed",
           outbox_record: instance_of(OutboxEntry)).exactly(2)
+      end
+
+      it "sleeps for a specific amount of time after processing determined by RailsTransactionalOutbox::RunnerSleepInterval" do
+        expect(RailsTransactionalOutbox::RunnerSleepInterval).to have_received(:interval_for)
       end
     end
   end

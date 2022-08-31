@@ -13,6 +13,12 @@ class RailsTransactionalOutbox
           .limit(batch_size)
       }
 
+      def self.any_records_to_process?
+        where(processed_at: nil)
+          .where("retry_at IS NULL OR retry_at <= ?", Time.current)
+          .exists?
+      end
+
       def self.outbox_encrypt_json_for(*encryptable_json_attributes)
         encryptable_json_attributes.each do |attribute|
           define_method "#{attribute}=" do |payload|

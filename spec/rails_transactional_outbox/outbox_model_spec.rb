@@ -52,6 +52,39 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     end
   end
 
+  describe ".any_records_to_process?" do
+    subject(:any_records_to_process?) { OutboxEntry.any_records_to_process? }
+
+    let(:event_name) { "example_resource_created" }
+
+    let!(:outbox_record_1) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "")
+    end
+    let!(:outbox_record_2) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "")
+    end
+
+    context "when there are some records to process" do
+      let!(:outbox_record_3) do
+        OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "")
+      end
+
+      before do
+        OutboxEntry.where.not(id: [outbox_record_1, outbox_record_2, outbox_record_3]).delete_all
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context "when there are no records to process" do
+      before do
+        OutboxEntry.where.not(id: [outbox_record_1, outbox_record_2]).delete_all
+      end
+
+      it { is_expected.to be false }
+    end
+  end
+
   describe "transformed_changeset/changeset=" do
     subject(:transformed_changeset) { outbox_record.transformed_changeset }
 

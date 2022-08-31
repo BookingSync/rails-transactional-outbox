@@ -85,6 +85,28 @@ RSpec.describe RailsTransactionalOutbox::Configuration do
     end
   end
 
+  describe "transactional_outbox_worker_idle_delay_multiplier" do
+    subject(:transactional_outbox_worker_idle_delay_multiplier) do
+      configuration.transactional_outbox_worker_idle_delay_multiplier
+    end
+
+    let(:configuration) { described_class.new }
+
+    context "when set" do
+      let(:custom_value) { 1.5 }
+
+      before do
+        configuration.transactional_outbox_worker_idle_delay_multiplier = custom_value
+      end
+
+      it { is_expected.to eq custom_value }
+    end
+
+    context "when not set" do
+      it { is_expected.to eq 10 }
+    end
+  end
+
   describe "outbox_model" do
     subject(:outbox_model) { configuration.outbox_model }
 

@@ -36,6 +36,7 @@ Rails.application.config.to_prepare do
     config.error_handler = Sentry # required
     
     config.transactional_outbox_worker_sleep_seconds = 1 # optional, defaults to 0.5
+    config.transactional_outbox_worker_idle_delay_multiplier = 5 # optional, defaults to 1, if there are no outbox entries to be processed, then the sleep time for the thread will be equal to transactional_outbox_worker_idle_delay_multiplier * transactional_outbox_worker_sleep_seconds  
     config.outbox_batch_size = 100 # optional, defaults to 100
     config.add_record_processor(MyCustomOperationProcerssor) # optional, by default it contains only one processor for ActiveRecord, but you could add more
   end

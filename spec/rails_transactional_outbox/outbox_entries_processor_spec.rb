@@ -26,11 +26,13 @@ RSpec.describe RailsTransactionalOutbox::OutboxEntriesProcessor, :freeze_time do
         end
       end.new
     end
+    let(:database_connection_provider) { ActiveRecord::Base }
+    let(:transaction_provider) { ActiveRecord::Base }
 
     before do
       RailsTransactionalOutbox.configure do |config|
-        config.database_connection_provider = ActiveRecord::Base
-        config.transaction_provider = ActiveRecord::Base
+        config.database_connection_provider = database_connection_provider
+        config.transaction_provider = transaction_provider
         config.outbox_model = OutboxEntry
         config.add_record_processor(test_record_processor)
       end
@@ -127,11 +129,21 @@ RSpec.describe RailsTransactionalOutbox::OutboxEntriesProcessor, :freeze_time do
       let(:processed_at_1) { 1.week.ago }
       let(:processed_at_2) { 1.week.ago }
 
+      before do
+        allow(transaction_provider).to receive(:transaction).and_yield
+      end
+
       it "does not process any outbox entries" do
         expect do
           call
         end.to avoid_changing { outbox_record_1.reload.processed_at }
           .and avoid_changing { outbox_record_2.reload.processed_at }
+      end
+
+      it "returns early" do
+        call
+
+        expect(transaction_provider).not_to have_received(:transaction)
       end
     end
   end
