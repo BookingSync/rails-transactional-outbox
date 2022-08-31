@@ -1,12 +1,13 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
+require "logger"
 require_relative "../lib/rails_transactional_outbox"
 
 result = RailsTransactionalOutbox::HealthCheck.check
 if result.empty?
   exit 0
 else
-  Rails.logger.fatal "[Rails Transactional Outbox Worker] health check failed: #{result}"
+  Logger.new($stdout).fatal("[Rails Transactional Outbox Worker] health check failed: #{result}")
   exit 1
 end
