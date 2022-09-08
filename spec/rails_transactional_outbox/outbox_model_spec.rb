@@ -32,7 +32,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     end
 
     it "returns sorted non-processed records up to a given limit
-    that are supposed to be retried now if they failed previously" do
+    and ones that are supposed to be retried now if they failed previously" do
       expect(fetch_processable).to eq([outbox_record_3, outbox_record_2])
     end
 
@@ -49,6 +49,127 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
 
         expect(collection).to have_received(:lock).with("FOR UPDATE SKIP LOCKED")
       end
+    end
+  end
+
+  describe ".fetch_processable_for_causality_key" do
+    subject(:fetch_processable_for_causality_key) do
+      OutboxEntry.fetch_processable_for_causality_key(batch_size, causality_key).to_a
+    end
+
+    let(:batch_size) { 2 }
+    let(:event_name) { "example_resource_created" }
+    let(:causality_key) { "some_causality_key" }
+
+    let!(:outbox_record_1) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.week.from_now, context: "",
+        causality_key: causality_key)
+    end
+    let!(:outbox_record_2) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.weeks.ago, context: "", causality_key: causality_key)
+    end
+    let!(:outbox_record_3) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "",
+        causality_key: causality_key)
+    end
+    let!(:outbox_record_4) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "",
+        causality_key: causality_key)
+    end
+    let!(:outbox_record_5) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "",
+        causality_key: causality_key)
+    end
+    let!(:outbox_record_6) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.months.ago, context: "", causality_key: "other")
+    end
+
+    before do
+      OutboxEntry.where.not(
+        id: [outbox_record_1, outbox_record_2, outbox_record_3, outbox_record_4, outbox_record_5, outbox_record_6]
+      ).delete_all
+    end
+
+    it "returns sorted non-processed records up to a given limit for causality key
+    and ones that are supposed to be retried now if they failed previously" do
+      expect(fetch_processable_for_causality_key).to eq([outbox_record_3, outbox_record_2])
+    end
+  end
+
+  describe ".processable_now" do
+    subject(:processable_now) { OutboxEntry.processable_now.to_a }
+
+    let(:event_name) { "example_resource_created" }
+
+    let!(:outbox_record_1) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.week.from_now, context: "")
+    end
+    let!(:outbox_record_2) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.weeks.ago, context: "")
+    end
+    let!(:outbox_record_3) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "")
+    end
+    let!(:outbox_record_4) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "")
+    end
+    let!(:outbox_record_5) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "")
+    end
+
+    before do
+      OutboxEntry.where.not(
+        id: [outbox_record_1, outbox_record_2, outbox_record_3, outbox_record_4, outbox_record_5]
+      ).delete_all
+    end
+
+    it "returns non-processed records and the ones that are supposed to be retried now if they failed previously" do
+      expect(processable_now).to match_array([outbox_record_1, outbox_record_2, outbox_record_3])
+    end
+  end
+
+  describe ".unprocessed_causality_keys" do
+    subject(:unprocessed_causality_keys) { OutboxEntry.unprocessed_causality_keys }
+
+    let(:event_name) { "example_resource_created" }
+    let(:causality_key) { "some_causality_key" }
+
+    let!(:outbox_record_1) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.week.from_now, context: "",
+        causality_key: causality_key)
+    end
+    let!(:outbox_record_2) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.weeks.ago, context: "", causality_key: causality_key)
+    end
+    let!(:outbox_record_3) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "",
+        causality_key: causality_key)
+    end
+    let!(:outbox_record_4) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "",
+        causality_key: causality_key)
+    end
+    let!(:outbox_record_5) do
+      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "",
+        causality_key: causality_key)
+    end
+    let!(:outbox_record_6) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.months.ago, context: "", causality_key: "other")
+    end
+    let!(:outbox_record_7) do
+      OutboxEntry.create(event_name: event_name, created_at: 2.months.ago, context: "",
+                         causality_key: "other_processed", processed_at: 1.day.ago)
+    end
+
+    before do
+      OutboxEntry.where.not(
+        id: [outbox_record_1, outbox_record_2, outbox_record_3, outbox_record_4, outbox_record_5, outbox_record_6,
+          outbox_record_7]
+      ).delete_all
+    end
+
+    it "returns unique unprocessed causality_keys" do
+      expect(unprocessed_causality_keys).to match_array([causality_key, "other"])
     end
   end
 
@@ -82,6 +203,34 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
       end
 
       it { is_expected.to be false }
+    end
+  end
+
+  describe ".mark_as_processed", :freeze_time do
+    subject(:mark_as_processed) { OutboxEntry.mark_as_processed([outbox_record_1]) }
+
+    let!(:outbox_record_1) do
+      OutboxEntry.create(event_name: "", context: "", error_class: "StandardError", error_message: "message",
+        retry_at: 1.day.from_now, failed_at: 1.week.ago)
+    end
+    let!(:outbox_record_2) do
+      OutboxEntry.create(event_name: "", context: "", error_class: "StandardError", error_message: "message",
+        retry_at: 1.day.from_now, failed_at: 1.week.ago)
+    end
+
+    it "marks the passed records as processed" do
+      expect do
+        mark_as_processed
+      end.to change { outbox_record_1.reload.processed_at }.from(nil).to(Time.current)
+        .and change { outbox_record_1.error_class }.from("StandardError").to(nil)
+        .and change { outbox_record_1.error_message }.from("message").to(nil)
+        .and change { outbox_record_1.retry_at }.from(1.day.from_now).to(nil)
+        .and change { outbox_record_1.failed_at }.from(1.week.ago).to(nil)
+        .and avoid_changing { outbox_record_2.reload.processed_at }
+        .and avoid_changing { outbox_record_2.error_class }
+        .and avoid_changing { outbox_record_2.error_message }
+        .and avoid_changing { outbox_record_2.retry_at }
+        .and avoid_changing { outbox_record_2.failed_at }
     end
   end
 

@@ -24,15 +24,15 @@ class RailsTransactionalOutbox
           .where("retry_at IS NULL OR retry_at <= ?", Time.current)
       }
 
-      def self.any_records_to_process?
-        processable_now.exists?
-      end
-
       def self.unprocessed_causality_keys
         processable_now
           .select("causality_key")
           .distinct
           .pluck(:causality_key)
+      end
+
+      def self.any_records_to_process?
+        processable_now.exists?
       end
 
       def self.mark_as_processed(processed_records)
