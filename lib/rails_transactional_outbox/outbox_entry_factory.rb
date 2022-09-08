@@ -25,7 +25,7 @@ class RailsTransactionalOutbox
         event_name: "#{model.model_name.singular}_#{event_name_suffix(event_type)}",
         context: RailsTransactionalOutbox::RecordProcessors::ActiveRecordProcessor.context,
         causality_key: outbox_entry_causality_key_resolver.call(model)
-      }
+      }.compact
     end
 
     def event_name_suffix(event_type)
