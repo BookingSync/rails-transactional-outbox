@@ -41,6 +41,7 @@ RSpec.configure do |config|
   config.after do
     RailsTransactionalOutbox.reset
     OutboxEntry.delete_all
+    OutboxEntryNoCausalityKey.delete_all
     User.delete_all
   end
 
@@ -113,6 +114,24 @@ RSpec.configure do |config|
     t.index %w[resource_class processed_at], name: "idx_outbox_enc_entries_on_resource_class_and_processed_at"
   end
 
+  database.drop_table(:outbox_entry_no_causality_keys) if database.table_exists?(:outbox_entry_no_causality_keys)
+  database.create_table(:outbox_entry_no_causality_keys) do |t|
+    t.string "resource_class"
+    t.string "resource_id"
+    t.string "event_name", null: false
+    t.string "context", null: false
+    t.datetime "processed_at"
+    t.jsonb "arguments", null: false, default: {}
+    t.jsonb "changeset", null: false, default: {}
+    t.datetime "failed_at"
+    t.datetime "retry_at"
+    t.string "error_class"
+    t.string "error_message"
+    t.integer "attempts", null: false, default: 0
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   database.drop_table(:users) if database.table_exists?(:users)
   database.create_table(:users) do |t|
     t.string "name", null: false
@@ -131,6 +150,10 @@ RSpec.configure do |config|
     crypt_keeper :changeset, :arguments, encryptor: :postgres_pgp, key: "secret_key", encoding: "UTF-8"
 
     outbox_encrypt_json_for :changeset, :arguments
+  end
+
+  class OutboxEntryNoCausalityKey < ActiveRecord::Base
+    include RailsTransactionalOutbox::OutboxModel
   end
 
   class User < ActiveRecord::Base
