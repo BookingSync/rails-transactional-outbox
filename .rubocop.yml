@@ -115,6 +115,7 @@ Metrics/AbcSize:
   Exclude:
     - 'lib/rails_transactional_outbox/runner.rb'
     - 'lib/rails_transactional_outbox/outbox_entries_processor.rb'
+    - 'lib/rails_transactional_outbox/outbox_entries_processors/non_ordered_processor.rb'
 
 Metrics/MethodLength:
   Max: 20
@@ -132,10 +133,12 @@ Lint/EmptyClass:
   Exclude:
     - 'lib/rails_transactional_outbox/error_handlers.rb'
     - 'lib/rails_transactional_outbox/record_processors.rb'
+    - 'lib/rails_transactional_outbox/outbox_entries_processors.rb'
 
 Metrics/BlockLength:
   Exclude:
     - 'lib/rails_transactional_outbox/reliable_model.rb'
+    - 'lib/rails_transactional_outbox/outbox_model.rb'
 
 Lint/ConstantDefinitionInBlock:
   Exclude:

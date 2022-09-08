@@ -38,112 +38,114 @@ RSpec.describe RailsTransactionalOutbox::OutboxEntriesProcessor, :freeze_time do
       end
     end
 
-    describe "when there are some outbox entries to be processed" do
-      let(:processed_at_1) { nil }
-      let(:processed_at_2) { nil }
+    describe "when using a default outbox entries processor which is a non-ordered one" do
+      describe "when there are some outbox entries to be processed" do
+        let(:processed_at_1) { nil }
+        let(:processed_at_2) { nil }
 
-      context "when success" do
-        it "marks entries as processed" do
-          expect do
-            call
-          end.to change { outbox_record_1.reload.processed_at }.from(nil).to(Time.current)
-            .and change { outbox_record_2.reload.processed_at }.from(nil).to(Time.current)
-            .and change { outbox_record_1.error_class }.to(nil)
-            .and change { outbox_record_1.error_message }.to(nil)
-            .and change { outbox_record_1.failed_at }.to(nil)
-            .and change { outbox_record_1.retry_at }.to(nil)
-        end
-
-        it "handles the actual processing via a processor" do
-          expect do
-            call
-          end.to change { outbox_record_1.reload.context }.from("").to("updated_from_processor")
-            .and change { outbox_record_2.reload.context }.from("").to("updated_from_processor")
-        end
-
-        it "returns the processed records" do
-          expect(call).to eq [outbox_record_2, outbox_record_1]
-        end
-
-        context "when the block is passed" do
-          subject(:call) do
-            described_class.new.call { |record| record.update!(updated_at: 10.days.from_now) }
-          end
-
-          it "yields the block upon processing" do
+        context "when success" do
+          it "marks entries as processed" do
             expect do
               call
-            end.to change { outbox_record_1.reload.updated_at }.to(10.days.from_now)
-              .and change { outbox_record_2.reload.updated_at }.to(10.days.from_now)
+            end.to change { outbox_record_1.reload.processed_at }.from(nil).to(Time.current)
+              .and change { outbox_record_2.reload.processed_at }.from(nil).to(Time.current)
+              .and change { outbox_record_1.error_class }.to(nil)
+              .and change { outbox_record_1.error_message }.to(nil)
+              .and change { outbox_record_1.failed_at }.to(nil)
+              .and change { outbox_record_1.retry_at }.to(nil)
+          end
+
+          it "handles the actual processing via a processor" do
+            expect do
+              call
+            end.to change { outbox_record_1.reload.context }.from("").to("updated_from_processor")
+              .and change { outbox_record_2.reload.context }.from("").to("updated_from_processor")
+          end
+
+          it "returns the processed records" do
+            expect(call).to eq [outbox_record_2, outbox_record_1]
+          end
+
+          context "when the block is passed" do
+            subject(:call) do
+              described_class.new.call { |record| record.update!(updated_at: 10.days.from_now) }
+            end
+
+            it "yields the block upon processing" do
+              expect do
+                call
+              end.to change { outbox_record_1.reload.updated_at }.to(10.days.from_now)
+                .and change { outbox_record_2.reload.updated_at }.to(10.days.from_now)
+            end
+          end
+        end
+
+        context "when failure" do
+          before do
+            allow(test_record_processor).to receive(:call).and_call_original
+            allow(test_record_processor).to receive(:call)
+              .with(outbox_record_2).and_raise(StandardError.new("something went wrong"))
+          end
+
+          it "marks only successful entries as processed" do
+            expect do
+              call
+            end.to change { outbox_record_1.reload.processed_at }.from(nil).to(Time.current)
+              .and avoid_changing { outbox_record_2.reload.processed_at }
+              .and change { outbox_record_1.error_class }.to(nil)
+              .and change { outbox_record_1.error_message }.to(nil)
+              .and change { outbox_record_1.failed_at }.to(nil)
+              .and change { outbox_record_1.retry_at }.to(nil)
+          end
+
+          it "handles the actual processing via a processor for successful entries" do
+            expect do
+              call
+            end.to change { outbox_record_1.reload.context }.from("").to("updated_from_processor")
+              .and avoid_changing { outbox_record_2.reload.context }
+          end
+
+          it "returns the records" do
+            expect(call).to eq [outbox_record_2, outbox_record_1]
+          end
+
+          context "when the block is passed" do
+            subject(:call) do
+              described_class.new.call { |record| record.update!(updated_at: 10.days.from_now) }
+            end
+
+            it "yields the block upon processing" do
+              expect do
+                call
+              end.to change { outbox_record_1.reload.updated_at }.to(10.days.from_now)
+                .and change { outbox_record_2.reload.updated_at }.to(10.days.from_now)
+
+              expect(outbox_record_2.error.to_s).to eq "something went wrong"
+            end
           end
         end
       end
 
-      context "when failure" do
+      describe "when there are no outbox entries to be processed" do
+        let(:processed_at_1) { 1.week.ago }
+        let(:processed_at_2) { 1.week.ago }
+
         before do
-          allow(test_record_processor).to receive(:call).and_call_original
-          allow(test_record_processor).to receive(:call)
-            .with(outbox_record_2).and_raise(StandardError.new("something went wrong"))
+          allow(transaction_provider).to receive(:transaction).and_yield
         end
 
-        it "marks only successful entries as processed" do
+        it "does not process any outbox entries" do
           expect do
             call
-          end.to change { outbox_record_1.reload.processed_at }.from(nil).to(Time.current)
+          end.to avoid_changing { outbox_record_1.reload.processed_at }
             .and avoid_changing { outbox_record_2.reload.processed_at }
-            .and change { outbox_record_1.error_class }.to(nil)
-            .and change { outbox_record_1.error_message }.to(nil)
-            .and change { outbox_record_1.failed_at }.to(nil)
-            .and change { outbox_record_1.retry_at }.to(nil)
         end
 
-        it "handles the actual processing via a processor for successful entries" do
-          expect do
-            call
-          end.to change { outbox_record_1.reload.context }.from("").to("updated_from_processor")
-            .and avoid_changing { outbox_record_2.reload.context }
-        end
-
-        it "returns the records" do
-          expect(call).to eq [outbox_record_2, outbox_record_1]
-        end
-
-        context "when the block is passed" do
-          subject(:call) do
-            described_class.new.call { |record| record.update!(updated_at: 10.days.from_now) }
-          end
-
-          it "yields the block upon processing" do
-            expect do
-              call
-            end.to change { outbox_record_1.reload.updated_at }.to(10.days.from_now)
-              .and change { outbox_record_2.reload.updated_at }.to(10.days.from_now)
-
-            expect(outbox_record_2.error.to_s).to eq "something went wrong"
-          end
-        end
-      end
-    end
-
-    describe "when there are no outbox entries to be processed" do
-      let(:processed_at_1) { 1.week.ago }
-      let(:processed_at_2) { 1.week.ago }
-
-      before do
-        allow(transaction_provider).to receive(:transaction).and_yield
-      end
-
-      it "does not process any outbox entries" do
-        expect do
+        it "returns early" do
           call
-        end.to avoid_changing { outbox_record_1.reload.processed_at }
-          .and avoid_changing { outbox_record_2.reload.processed_at }
-      end
 
-      it "returns early" do
-        call
-
-        expect(transaction_provider).not_to have_received(:transaction)
+          expect(transaction_provider).not_to have_received(:transaction)
+        end
       end
     end
   end

@@ -193,4 +193,85 @@ RSpec.describe RailsTransactionalOutbox::Configuration do
       end
     end
   end
+
+  describe "outbox_entries_processor" do
+    subject(:outbox_entries_processor) { configuration.outbox_entries_processor }
+
+    let(:configuration) { described_class.new }
+
+    context "when set" do
+      let(:custom_value) { :outbox_entries_processor }
+
+      before do
+        configuration.outbox_entries_processor = custom_value
+      end
+
+      it { is_expected.to eq custom_value }
+    end
+
+    context "when not set" do
+      it { is_expected.to be_a RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor }
+    end
+  end
+
+  describe "lock_client" do
+    subject(:lock_client) { configuration.lock_client }
+
+    let(:configuration) { described_class.new }
+
+    context "when set" do
+      let(:custom_value) { :lock_client }
+
+      before do
+        configuration.lock_client = custom_value
+      end
+
+      it { is_expected.to eq custom_value }
+    end
+
+    context "when not set" do
+      it { is_expected.to eq RailsTransactionalOutbox::NullLockClient }
+    end
+  end
+
+  describe "lock_expiry_time" do
+    subject(:lock_expiry_time) { configuration.lock_expiry_time }
+
+    let(:configuration) { described_class.new }
+
+    context "when set" do
+      let(:custom_value) { :lock_expiry_time }
+
+      before do
+        configuration.lock_expiry_time = custom_value
+      end
+
+      it { is_expected.to eq custom_value }
+    end
+
+    context "when not set" do
+      it { is_expected.to eq 10_000 }
+    end
+  end
+
+  describe "outbox_entry_causality_key_resolver" do
+    subject(:outbox_entry_causality_key_resolver) { configuration.outbox_entry_causality_key_resolver.call(model) }
+
+    let(:configuration) { described_class.new }
+    let(:model) { User }
+
+    context "when set" do
+      let(:custom_resolver) { ->(model) { model.to_s } }
+
+      before do
+        configuration.outbox_entry_causality_key_resolver = custom_resolver
+      end
+
+      it { is_expected.to eq "User" }
+    end
+
+    context "when not set" do
+      it { is_expected.to be_nil }
+    end
+  end
 end

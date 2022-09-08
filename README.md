@@ -39,6 +39,11 @@ Rails.application.config.to_prepare do
     config.transactional_outbox_worker_idle_delay_multiplier = 5 # optional, defaults to 1, if there are no outbox entries to be processed, then the sleep time for the thread will be equal to transactional_outbox_worker_idle_delay_multiplier * transactional_outbox_worker_sleep_seconds  
     config.outbox_batch_size = 100 # optional, defaults to 100
     config.add_record_processor(MyCustomOperationProcerssor) # optional, by default it contains only one processor for ActiveRecord, but you could add more
+    
+    config.lock_client = Redlock::Client.new([ENV["REDIS_URL"]]) # required if you want to use RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor, defaults to RailsTransactionalOutbox::NullLockClient. Check its interface and the interface of `redlock` gem. To cut the long story short, when the lock is acquired, a hash with the structure outlined in RailsTransactionalOutbox::NullLockClient should be yielded, if the lock is not acquired, a nil should be yielded.
+    config.lock_expiry_time  = 10_000 # not required, defaults to 10_000, the unit is milliseconds
+    config.outbox_entries_processor = `RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor`.new # not required, defaults to RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor.new
+    config.outbox_entry_causality_key_resolver = ->(model) { model.tenant_id } # not required, defaults to a lambda returning nil. Needed when using `outbox_entry_causality_key_resolver`  
   end
 end
 ```
@@ -66,6 +71,7 @@ create_table(:outbox_entries) do |t|
   t.datetime "processed_at"
   t.text "arguments", null: false, default: "{}"
   t.text "changeset", null: false, default: "{}"
+  t.string "causality_key"
   t.datetime "failed_at"
   t.datetime "retry_at"
   t.string "error_class"
@@ -79,6 +85,7 @@ create_table(:outbox_entries) do |t|
   t.index ["context"], name: "idx_outbox_enc_entries_on_topic"
   t.index ["created_at"], name: "idx_outbox_enc_entries_on_created_at"
   t.index ["created_at"], name: "idx_outbox_enc_entries_on_created_at_not_processed", where: "processed_at IS NULL"
+  t.index ["causality_key", created_at"], name: "idx_outbox_enc_entries_on_c_key_crtd_at_n_proc", where: "processed_at IS NULL"
   t.index %w[resource_class created_at], name: "idx_outbox_enc_entries_on_resource_class_and_created_at"
   t.index %w[resource_class processed_at], name: "idx_outbox_enc_entries_on_resource_class_and_processed_at"
 end
@@ -112,11 +119,18 @@ When executing the callbacks, you can use `previous_changes` which will contain 
 
 Inclusion of this module will result in OutboxEntry records being created after create/update/destroy. For these entries, the `context` column will be populated with `active_record` value.
 
-### Ordering issues
+### Ordering/Preserving causality
 
-The order will be preserved only if there is no concurrency (i.e. a single process with a single thread). Internally, `.lock("FOR UPDATE SKIP LOCKED")` is used to avoid conflicts and other issues related to concurrency, but at the cost of no longer preserving the order of outbox entries.
+There are two type of processors that have very different behavior depending on the concurrency:
 
-Future releases might address that issue with some extra topics/queues where the ordering will be preserved.
+1. `RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor` (used by default):
+
+By default, the order will be preserved only if there is no concurrency (i.e. a single process with a single thread). Internally, `.lock("FOR UPDATE SKIP LOCKED")` is used to avoid conflicts and other issues related to concurrency but at the cost of no longer preserving the causality of outbox entries (although the entries are ordered by `created_at`).
+
+2`RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor`:
+
+Uses lock (e.g. Redlock) to preserve causality determined by `causality_key` (e.g. a tenant ID).
+
 
 ### Custom processors
 
