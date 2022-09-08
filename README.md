@@ -42,7 +42,8 @@ Rails.application.config.to_prepare do
     
     config.lock_client = Redlock::Client.new([ENV["REDIS_URL"]]) # required if you want to use RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor, defaults to RailsTransactionalOutbox::NullLockClient. Check its interface and the interface of `redlock` gem. To cut the long story short, when the lock is acquired, a hash with the structure outlined in RailsTransactionalOutbox::NullLockClient should be yielded, if the lock is not acquired, a nil should be yielded.
     config.lock_expiry_time  = 10_000 # not required, defaults to 10_000, the unit is milliseconds
-    config.outbox_entries_processor = RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor.new # not required, defaults to RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor.new
+    config.outbox_entries_processor = `RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor`.new # not required, defaults to RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor.new
+    config.outbox_entry_causality_key_resolver = ->(model) { model.tenant_id } # not required, defaults to a lambda returning nil. Needed when using `outbox_entry_causality_key_resolver`  
   end
 end
 ```

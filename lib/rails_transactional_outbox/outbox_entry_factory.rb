@@ -10,10 +10,12 @@ class RailsTransactionalOutbox
     end
 
     def build(model, event_type)
-      config.outbox_model.new(attributes_for_entry(model, event_type))
+      outbox_model.new(attributes_for_entry(model, event_type))
     end
 
     private
+
+    delegate :outbox_model, :outbox_entry_causality_key_resolver, to: :config
 
     def attributes_for_entry(model, event_type)
       {
@@ -21,7 +23,8 @@ class RailsTransactionalOutbox
         resource_id: model.id,
         changeset: model.saved_changes,
         event_name: "#{model.model_name.singular}_#{event_name_suffix(event_type)}",
-        context: RailsTransactionalOutbox::RecordProcessors::ActiveRecordProcessor.context
+        context: RailsTransactionalOutbox::RecordProcessors::ActiveRecordProcessor.context,
+        causality_key: outbox_entry_causality_key_resolver.call(model)
       }
     end
 

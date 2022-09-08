@@ -19,6 +19,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxEntryFactory, :freeze_time do
     before do
       RailsTransactionalOutbox.configure do |config|
         config.outbox_model = OutboxEntry
+        config.outbox_entry_causality_key_resolver = ->(model) { model.class.to_s }
       end
     end
 
@@ -32,6 +33,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxEntryFactory, :freeze_time do
         expect(build.resource_class).to eq "User"
         expect(build.changeset).to eq expected_changeset
         expect(build.event_name).to eq "user_created"
+        expect(build.causality_key).to eq "User"
       end
     end
 
@@ -45,6 +47,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxEntryFactory, :freeze_time do
         expect(build.resource_class).to eq "User"
         expect(build.changeset).to eq expected_changeset
         expect(build.event_name).to eq "user_updated"
+        expect(build.causality_key).to eq "User"
       end
     end
 
@@ -58,6 +61,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxEntryFactory, :freeze_time do
         expect(build.resource_class).to eq "User"
         expect(build.changeset).to eq expected_changeset
         expect(build.event_name).to eq "user_destroyed"
+        expect(build.causality_key).to eq "User"
       end
     end
 

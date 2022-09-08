@@ -253,4 +253,25 @@ RSpec.describe RailsTransactionalOutbox::Configuration do
       it { is_expected.to eq 10_000 }
     end
   end
+
+  describe "outbox_entry_causality_key_resolver" do
+    subject(:outbox_entry_causality_key_resolver) { configuration.outbox_entry_causality_key_resolver.call(model) }
+
+    let(:configuration) { described_class.new }
+    let(:model) { User }
+
+    context "when set" do
+      let(:custom_resolver) { ->(model) { model.to_s } }
+
+      before do
+        configuration.outbox_entry_causality_key_resolver = custom_resolver
+      end
+
+      it { is_expected.to eq "User" }
+    end
+
+    context "when not set" do
+      it { is_expected.to be_nil }
+    end
+  end
 end

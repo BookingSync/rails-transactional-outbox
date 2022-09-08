@@ -158,7 +158,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     end
     let!(:outbox_record_7) do
       OutboxEntry.create(event_name: event_name, created_at: 2.months.ago, context: "",
-                         causality_key: "other_processed", processed_at: 1.day.ago)
+        causality_key: "other_processed", processed_at: 1.day.ago)
     end
 
     before do
