@@ -6,17 +6,38 @@ class RailsTransactionalOutbox
 
     included do
       scope :fetch_processable, lambda { |batch_size|
-        where(processed_at: nil)
+        processable_now
           .lock("FOR UPDATE SKIP LOCKED")
-          .where("retry_at IS NULL OR retry_at <= ?", Time.current)
           .order(created_at: :asc)
           .limit(batch_size)
       }
 
-      def self.any_records_to_process?
+      scope :fetch_processable_for_causality_key, lambda { |batch_size, causality_key|
+        processable_now
+          .where(causality_key: causality_key)
+          .order(created_at: :asc)
+          .limit(batch_size)
+      }
+
+      scope :processable_now, lambda {
         where(processed_at: nil)
           .where("retry_at IS NULL OR retry_at <= ?", Time.current)
-          .exists?
+      }
+
+      def self.any_records_to_process?
+        processable_now.exists?
+      end
+
+      def self.unprocessed_causality_keys
+        processable_now
+          .select("causality_key")
+          .distinct
+          .pluck(:causality_key)
+      end
+
+      def self.mark_as_processed(processed_records)
+        where(id: processed_records).update_all(processed_at: Time.current, error_class: nil, error_message: nil,
+          failed_at: nil, retry_at: nil)
       end
 
       def self.outbox_encrypt_json_for(*encryptable_json_attributes)

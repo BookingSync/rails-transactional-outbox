@@ -10,6 +10,7 @@ gem "rake", "~> 13.0"
 gem "crypt_keeper", github: "jmazzi/crypt_keeper"
 gem "ddtrace"
 gem "pg"
+gem "redlock"
 gem "rspec", "~> 3.0"
 gem "rubocop", require: false
 gem "rubocop-performance"

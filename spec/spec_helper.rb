@@ -7,6 +7,7 @@ require "timecop"
 require "active_record"
 require "crypt_keeper"
 require "sentry-ruby"
+require "redlock"
 require "rails-transactional-outbox"
 
 RSpec.configure do |config|
@@ -67,6 +68,7 @@ RSpec.configure do |config|
     t.datetime "processed_at"
     t.jsonb "arguments", null: false, default: {}
     t.jsonb "changeset", null: false, default: {}
+    t.string "causality_key"
     t.datetime "failed_at"
     t.datetime "retry_at"
     t.string "error_class"
@@ -93,6 +95,7 @@ RSpec.configure do |config|
     t.datetime "processed_at"
     t.text "arguments", null: false, default: "{}"
     t.text "changeset", null: false, default: "{}"
+    t.string "causality_key"
     t.datetime "failed_at"
     t.datetime "retry_at"
     t.string "error_class"
