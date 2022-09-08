@@ -1,6 +1,8 @@
 ## [Unreleased]
 
-- Simplify update to 0.2.0 (`causality_key` is not required if `outbox_entry_causality_key_resolver` is not used)
+## [0.2.1] - 2022-09-08
+
+- Simplify update to 0.2 (`causality_key` is not required if `outbox_entry_causality_key_resolver` is not used)
 
 ## [0.2.0] - 2022-09-08
 
