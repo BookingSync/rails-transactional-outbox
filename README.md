@@ -29,21 +29,21 @@ Create the initializer with the following content:
 ``` rb
 Rails.application.config.to_prepare do
   RailsTransactionalOutbox.configure do |config|
-    config.database_connection_provider = ActiveRecord::Base # required 
+    config.database_connection_provider = ActiveRecord::Base # required
     config.transaction_provider = ActiveRecord::Base # required
     config.logger = Rails.logger # required
     config.outbox_model = OutboxEntry # required
-    config.error_handler = Sentry # non-required, but highly recommended, defaults to RailsTransactionalOutbox::ErrorHandlers::NullErrorHandler
-    
+    config.error_handler = Sentry # non-required, but highly recommended, defaults to RailsTransactionalOutbox::ErrorHandlers::NullErrorHandler. When using Sentry, you will probably want to exclude SignalException `config.excluded_exceptions += ["SignalException"]`.
+
     config.transactional_outbox_worker_sleep_seconds = 1 # optional, defaults to 0.5
-    config.transactional_outbox_worker_idle_delay_multiplier = 5 # optional, defaults to 1, if there are no outbox entries to be processed, then the sleep time for the thread will be equal to transactional_outbox_worker_idle_delay_multiplier * transactional_outbox_worker_sleep_seconds  
+    config.transactional_outbox_worker_idle_delay_multiplier = 5 # optional, defaults to 1, if there are no outbox entries to be processed, then the sleep time for the thread will be equal to transactional_outbox_worker_idle_delay_multiplier * transactional_outbox_worker_sleep_seconds
     config.outbox_batch_size = 100 # optional, defaults to 100
     config.add_record_processor(MyCustomOperationProcerssor) # optional, by default it contains only one processor for ActiveRecord, but you could add more
-    
+
     config.lock_client = Redlock::Client.new([ENV["REDIS_URL"]]) # required if you want to use RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor, defaults to RailsTransactionalOutbox::NullLockClient. Check its interface and the interface of `redlock` gem. To cut the long story short, when the lock is acquired, a hash with the structure outlined in RailsTransactionalOutbox::NullLockClient should be yielded, if the lock is not acquired, a nil should be yielded.
     config.lock_expiry_time  = 10_000 # not required, defaults to 10_000, the unit is milliseconds
     config.outbox_entries_processor = `RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor`.new # not required, defaults to RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor.new
-    config.outbox_entry_causality_key_resolver = ->(model) { model.tenant_id } # not required, defaults to a lambda returning nil. Needed when using `outbox_entry_causality_key_resolver`  
+    config.outbox_entry_causality_key_resolver = ->(model) { model.tenant_id } # not required, defaults to a lambda returning nil. Needed when using `outbox_entry_causality_key_resolver`
   end
 end
 ```
@@ -53,7 +53,7 @@ Create OutboxEntry model (or use a different name, just make sure to adjust conf
 ``` rb
 class OutboxEntry < ApplicationRecord
   include RailsTransactionalOutbox::OutboxModel
-  
+
   # optional, if you want to use encryption
   crypt_keeper :changeset, :arguments, encryptor: :postgres_pgp, key: ENV.fetch("CRYPT_KEEPER_KEY"), encoding: "UTF-8"
   outbox_encrypt_json_for :changeset, :arguments
@@ -93,7 +93,7 @@ end
 
 Keep in mind that `arguments` and `changeset` are `text` columns here. If you don't want to use encryption, replace them with `jsonb` columns:
 
-```rb 
+```rb
 t.jsonb "arguments", null: false, default: {}
 t.jsonb "changeset", null: false, default: {}
 ```
@@ -105,7 +105,7 @@ As the last step, include `RailsTransactionalOutbox::ReliableModel` module in th
 ``` ruby
 class User < ActiveRecord::Base
   include RailsTransactionalOutbox::ReliableModel
-end 
+end
 ```
 
 Now, you can just replace `after_commit` callbacks with `reliable_after_commit`. The interface is going to be the same as for `after_commit`:
