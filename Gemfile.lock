@@ -14,7 +14,7 @@ PATH
       activesupport (>= 3.2)
       concurrent-ruby
       dry-monitor
-      redis
+      file-based-healthcheck
       sigurd
       zeitwerk
 
@@ -55,6 +55,8 @@ GEM
       zeitwerk (~> 2.5)
     exponential-backoff (0.0.4)
     ffi (1.15.5)
+    file-based-healthcheck (0.1.1)
+      activesupport (>= 3.2)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     json (2.6.2)
