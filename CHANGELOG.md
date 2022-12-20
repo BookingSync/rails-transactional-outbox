@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.3.0] - 2022-12-20
+
 - Move to file-based healthchecks, instead of using Redis-based ones.
 
 ## [0.2.1] - 2022-09-08
