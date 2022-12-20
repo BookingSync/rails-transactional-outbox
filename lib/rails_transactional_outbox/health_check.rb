@@ -1,45 +1,44 @@
 # frozen_string_literal: true
 
-require "redis"
-
 class RailsTransactionalOutbox
   class HealthCheck
     KEY_PREFIX = "__rails_transactional__outbox_worker__running__"
-    VALUE = "OK"
-    private_constant :KEY_PREFIX, :VALUE
+    TMP_DIR = "/tmp"
+    private_constant :KEY_PREFIX, :TMP_DIR
 
-    def self.check(redis_url: ENV.fetch("REDIS_URL", nil), hostname: ENV.fetch("HOSTNAME", nil),
-      expiry_time_in_seconds: 120)
-      new(redis_url: redis_url, hostname: hostname, expiry_time_in_seconds: expiry_time_in_seconds).check
+    def self.check(hostname: ENV.fetch("HOSTNAME", nil), expiry_time_in_seconds: 120)
+      new(hostname: hostname, expiry_time_in_seconds: expiry_time_in_seconds).check
     end
 
-    attr_reader :redis_client, :hostname, :expiry_time_in_seconds
+    attr_reader :hostname, :expiry_time_in_seconds
 
-    def initialize(redis_url: ENV.fetch("REDIS_URL", nil), hostname: ENV.fetch("HOSTNAME", nil),
-      expiry_time_in_seconds: 120)
-      @redis_client = Redis.new(url: redis_url)
+    def initialize(hostname: ENV.fetch("HOSTNAME", nil), expiry_time_in_seconds: 120)
       @hostname = hostname
       @expiry_time_in_seconds = expiry_time_in_seconds
     end
 
     def check
-      value = redis_client.get(key)
-      if value == VALUE
+      if healthcheck_storage.running?
         ""
       else
-        "[Rails Transactional Outbox Worker - expected #{VALUE} under #{key}, found: #{value}] "
+        "[Rails Transactional Outbox Worker healthcheck failed]"
       end
     end
 
     def register_heartbeat
-      redis_client.set(key, VALUE, ex: expiry_time_in_seconds)
+      healthcheck_storage.touch
     end
 
     def worker_stopped
-      redis_client.del(key)
+      healthcheck_storage.remove
     end
 
     private
+
+    def healthcheck_storage
+      @healthcheck_storage ||= FileBasedHealthcheck.new(directory: TMP_DIR, filename: key,
+        time_threshold: expiry_time_in_seconds)
+    end
 
     def key
       "#{KEY_PREFIX}#{hostname}"

@@ -247,9 +247,8 @@ end
 
 ### Health Checks
 
-First, you need to set `REDIS_URL` ENV variable to provide the URL for Redis.
 
-Then, you need to explicitly enable the health check (e.g. in the initializer):
+Then, Uou need to explicitly enable the health check (e.g. in the initializer):
 
 ``` rb
 RailsTransactionalOutbox.enable_outbox_worker_healthcheck
@@ -260,8 +259,6 @@ To perform the actual health check, use `bin/rails_transactional_outbox_health_c
 ```
 bundle exec rails_transactional_outbox_health_check
 ```
-
-The logic is based on checking a special value in Redis that is set (and unset) for a given container when Outbox workers are initialized/stopped/processing messages.
 
 It works for both readiness and liveness checks.
 

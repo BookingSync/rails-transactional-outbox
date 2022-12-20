@@ -5,6 +5,7 @@ require "logger"
 require "dry-monitor"
 require "sigurd"
 require "concurrent-ruby"
+require "file-based-healthcheck"
 
 class RailsTransactionalOutbox
   def self.loader

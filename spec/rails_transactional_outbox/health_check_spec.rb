@@ -3,12 +3,11 @@
 require "spec_helper"
 
 RSpec.describe RailsTransactionalOutbox::HealthCheck do
-  let(:redis_client) { Redis.new(url: ENV.fetch("REDIS_URL", nil)) }
-  let(:key) { "__rails_transactional__outbox_worker__running__hostname" }
-
-  before do
-    redis_client.del(key)
+  let(:healthcheck_storage) do
+    FileBasedHealthcheck.new(directory: directory, filename: key, time_threshold: 120)
   end
+  let(:directory) { "/tmp" }
+  let(:key) { "__rails_transactional__outbox_worker__running__hostname" }
 
   around do |example|
     original_hostname = ENV.fetch("HOSTNAME", nil)
@@ -19,41 +18,26 @@ RSpec.describe RailsTransactionalOutbox::HealthCheck do
     ENV["HOSTNAME"] = original_hostname
   end
 
+  after do
+    healthcheck_storage.remove
+  end
+
   describe ".check" do
     subject(:check) { health_check.check }
 
     let(:health_check) { described_class }
 
-    context "when expected value was not set yet in Redis" do
-      let(:expected_result) do
-        "[Rails Transactional Outbox Worker - expected OK under #{key}, found: ] "
-      end
+    context "when the heartbeat has not been registered" do
+      let(:expected_result) { "[Rails Transactional Outbox Worker healthcheck failed]" }
 
       it { is_expected.to eq expected_result }
     end
 
-    context "when expected value was set in Redis but it's an incorrect one" do
-      let(:value) { "other" }
-      let(:expected_result) do
-        "[Rails Transactional Outbox Worker - expected OK under #{key}, found: #{value}] "
-      end
-
-      before do
-        redis_client.set(key, value)
-      end
-
-      it { is_expected.to eq expected_result }
-    end
-
-    context "when expected value was set in Redis and it's a correct one" do
+    context "when the heartbeat has been registered" do
       let(:health_check) { described_class }
 
       before do
-        health_check.new.register_heartbeat
-      end
-
-      after do
-        health_check.new.worker_stopped
+        healthcheck_storage.touch
       end
 
       it { is_expected.to eq "" }
@@ -65,21 +49,10 @@ RSpec.describe RailsTransactionalOutbox::HealthCheck do
 
     let(:health_check) { described_class.new }
 
-    before do
-      allow(Redis).to receive(:new).and_return(redis_client)
-      allow(redis_client).to receive(:set).and_call_original
-    end
-
-    it "sets OK value under special key in Redis" do
+    it "registers a heartbeat" do
       expect do
         register_heartbeat
-      end.to change { redis_client.get(key) }.from(nil).to("OK")
-    end
-
-    it "sets expiry time for the key" do
-      register_heartbeat
-
-      expect(redis_client).to have_received(:set).with(key, anything, ex: 120)
+      end.to change { healthcheck_storage.running? }.from(false).to(true)
     end
   end
 
@@ -92,10 +65,10 @@ RSpec.describe RailsTransactionalOutbox::HealthCheck do
       health_check.register_heartbeat
     end
 
-    it "sets nil under special key in Redis" do
+    it "removes the registry for hearbeats" do
       expect do
         worker_stopped
-      end.to change { redis_client.get(key) }.from("OK").to(nil)
+      end.to change { healthcheck_storage.running? }.from(true).to(false)
     end
   end
 end
