@@ -17,9 +17,11 @@ class RailsTransactionalOutbox
       def call(record)
         model = record.infer_model
         if model.nil?
-          return unless RailsTransactionalOutbox.configuration.raise_not_found_model_error
+          if RailsTransactionalOutbox.configuration.raise_not_found_model_error?
+            raise CouldNotFindModelError.new(record)
+          end
 
-          raise CouldNotFindModelError.new(record)
+          return
         end
         model.previous_changes = record.transformed_changeset.with_indifferent_access
         model.reliable_after_commit_callbacks.for_event_type(record.event_type).each do |callback|

@@ -37,8 +37,12 @@ class RailsTransactionalOutbox
     end
 
     def raise_not_found_model_error
-      @raise_not_found_model_error.nil? ? true : @raise_not_found_model_error
+      return @raise_not_found_model_error if defined?(@raise_not_found_model_error)
+
+      true
     end
+
+    alias_method :raise_not_found_model_error?, :raise_not_found_model_error
 
     def lock_client
       @lock_client || RailsTransactionalOutbox::NullLockClient
