@@ -5,7 +5,8 @@ class RailsTransactionalOutbox
     attr_accessor :database_connection_provider, :logger, :outbox_model, :transaction_provider
     attr_writer :error_handler, :transactional_outbox_worker_sleep_seconds,
       :transactional_outbox_worker_idle_delay_multiplier, :outbox_batch_size, :outbox_entries_processor,
-      :lock_client, :lock_expiry_time, :outbox_entry_causality_key_resolver
+      :lock_client, :lock_expiry_time, :outbox_entry_causality_key_resolver,
+      :raise_not_found_model_error
 
     def error_handler
       @error_handler || RailsTransactionalOutbox::ErrorHandlers::NullErrorHandler
@@ -33,6 +34,10 @@ class RailsTransactionalOutbox
 
     def outbox_entries_processor
       @outbox_entries_processor ||= RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor.new
+    end
+
+    def raise_not_found_model_error
+      @raise_not_found_model_error.nil? ? true : @raise_not_found_model_error
     end
 
     def lock_client

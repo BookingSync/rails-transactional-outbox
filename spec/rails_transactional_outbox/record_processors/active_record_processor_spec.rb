@@ -80,6 +80,14 @@ RSpec.describe RailsTransactionalOutbox::RecordProcessors::ActiveRecordProcessor
       let(:resource_id) { "unknown" }
 
       it { is_expected_block.to raise_error "could not find model for outbox record: 123" }
+
+      context "with configuration set not to raise error" do
+        before do
+          RailsTransactionalOutbox.configuration.raise_not_found_model_error = false
+        end
+
+        it { expect { call }.not_to raise_error }
+      end
     end
   end
 end
