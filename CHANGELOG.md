@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.3.1] - 2023-05-24
+
+- add config option whether to raise error when outbox entry record is not found
+
 ## [0.3.0] - 2022-12-20
 
 - Move to file-based healthchecks, instead of using Redis-based ones.

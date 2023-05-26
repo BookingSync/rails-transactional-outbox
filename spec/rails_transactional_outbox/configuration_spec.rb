@@ -214,6 +214,26 @@ RSpec.describe RailsTransactionalOutbox::Configuration do
     end
   end
 
+  describe "raise_not_found_model_error" do
+    subject(:raise_not_found_model_error) { configuration.raise_not_found_model_error }
+
+    let(:configuration) { described_class.new }
+
+    context "when set" do
+      let(:custom_value) { false }
+
+      before do
+        configuration.raise_not_found_model_error = custom_value
+      end
+
+      it { is_expected.to eq custom_value }
+    end
+
+    context "when not set" do
+      it { is_expected.to be true }
+    end
+  end
+
   describe "lock_client" do
     subject(:lock_client) { configuration.lock_client }
 

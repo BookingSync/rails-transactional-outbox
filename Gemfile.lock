@@ -9,7 +9,7 @@ GIT
 PATH
   remote: .
   specs:
-    rails-transactional-outbox (0.3.0)
+    rails-transactional-outbox (0.3.1)
       activerecord (>= 5)
       activesupport (>= 3.2)
       concurrent-ruby
@@ -55,7 +55,7 @@ GEM
       dry-events (~> 1.0, < 2)
     exponential-backoff (0.0.4)
     ffi (1.15.5)
-    file-based-healthcheck (0.1.1)
+    file-based-healthcheck (0.2.0)
       activesupport (>= 3.2)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
@@ -121,7 +121,7 @@ GEM
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.2.0)
-    zeitwerk (2.6.6)
+    zeitwerk (2.6.8)
 
 PLATFORMS
   x86_64-darwin-18
