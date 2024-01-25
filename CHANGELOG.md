@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.4.0] - 2024-01-25
+
+- add config option to specify causality keys limit
+
 ## [0.3.1] - 2023-05-24
 
 - add config option whether to raise error when outbox entry record is not found

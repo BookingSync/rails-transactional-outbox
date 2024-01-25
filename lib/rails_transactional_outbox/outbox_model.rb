@@ -24,9 +24,10 @@ class RailsTransactionalOutbox
           .where("retry_at IS NULL OR retry_at <= ?", Time.current)
       }
 
-      def self.unprocessed_causality_keys
+      def self.unprocessed_causality_keys(limit: RailsTransactionalOutbox.configuration.unprocessed_causality_keys_limit)
         processable_now
           .select("causality_key")
+          .limit(limit)
           .distinct
           .pluck(:causality_key)
       end

@@ -45,6 +45,7 @@ Rails.application.config.to_prepare do
     config.lock_expiry_time  = 10_000 # not required, defaults to 10_000, the unit is milliseconds
     config.outbox_entries_processor = `RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor`.new # not required, defaults to RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor.new
     config.outbox_entry_causality_key_resolver = ->(model) { model.tenant_id } # not required, defaults to a lambda returning nil. Needed when using `outbox_entry_causality_key_resolver`
+    config.unprocessed_causality_keys_limit = 100_000 # not required, defaults to 10_000. Might be a good idea to decrease the value when you start experiencing OOMs - they are likely to be caused by fetching too many causality keys. It is likely to happen when you have huge amount of records to process.
   end
 end
 ```

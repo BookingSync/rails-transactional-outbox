@@ -17,9 +17,7 @@ class RailsTransactionalOutbox
       def call(record)
         model = record.infer_model
         if model.nil?
-          if RailsTransactionalOutbox.configuration.raise_not_found_model_error?
-            raise CouldNotFindModelError.new(record)
-          end
+          raise CouldNotFindModelError.new(record) if RailsTransactionalOutbox.configuration.raise_not_found_model_error?
 
           return
         end
