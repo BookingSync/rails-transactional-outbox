@@ -6,7 +6,7 @@ class RailsTransactionalOutbox
     attr_writer :error_handler, :transactional_outbox_worker_sleep_seconds,
       :transactional_outbox_worker_idle_delay_multiplier, :outbox_batch_size, :outbox_entries_processor,
       :lock_client, :lock_expiry_time, :outbox_entry_causality_key_resolver,
-      :raise_not_found_model_error
+      :raise_not_found_model_error, :unprocessed_causality_keys_limit
 
     def error_handler
       @error_handler || RailsTransactionalOutbox::ErrorHandlers::NullErrorHandler
@@ -54,6 +54,12 @@ class RailsTransactionalOutbox
 
     def outbox_entry_causality_key_resolver
       @outbox_entry_causality_key_resolver || ->(_model) {}
+    end
+
+    def unprocessed_causality_keys_limit
+      return @unprocessed_causality_keys_limit.to_i if defined?(@unprocessed_causality_keys_limit)
+
+      10_000
     end
   end
 end

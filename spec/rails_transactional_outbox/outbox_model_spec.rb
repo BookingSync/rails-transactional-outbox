@@ -171,6 +171,21 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     it "returns unique unprocessed causality_keys" do
       expect(unprocessed_causality_keys).to match_array([causality_key, "other"])
     end
+
+    context "when limit is specified" do
+      around do |example|
+        original_limit = RailsTransactionalOutbox.configuration.unprocessed_causality_keys_limit
+        RailsTransactionalOutbox.configuration.unprocessed_causality_keys_limit = 1
+
+        example.run
+
+        RailsTransactionalOutbox.configuration.unprocessed_causality_keys_limit = original_limit
+      end
+
+      it "returns unique unprocessed causality_keys up to the limit" do
+        expect(unprocessed_causality_keys).to match_array(["other"])
+      end
+    end
   end
 
   describe ".any_records_to_process?" do

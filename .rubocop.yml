@@ -151,3 +151,6 @@ RSpec/AnyInstance:
 RSpec/VerifiedDoubles:
   Exclude:
     - 'spec/rails_transactional_outbox/runner_spec.rb'
+
+Layout/LineLength:
+  Max: 125

@@ -294,4 +294,24 @@ RSpec.describe RailsTransactionalOutbox::Configuration do
       it { is_expected.to be_nil }
     end
   end
+
+  describe "#unprocessed_causality_keys_limit" do
+    subject(:unprocessed_causality_keys_limit) { configuration.unprocessed_causality_keys_limit }
+
+    let(:configuration) { described_class.new }
+
+    context "when set" do
+      let(:custom_unprocessed_causality_keys_limit) { "101" }
+
+      before do
+        configuration.unprocessed_causality_keys_limit = custom_unprocessed_causality_keys_limit
+      end
+
+      it { is_expected.to eq 101 }
+    end
+
+    context "when not set" do
+      it { is_expected.to eq 10_000 }
+    end
+  end
 end
