@@ -50,8 +50,8 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
       end.new
     end
 
-    let!(:outbox_record_1) { OutboxEntry.create(event_name: event_name, context: "", created_at: Time.current) }
-    let!(:outbox_record_2) { OutboxEntry.create(event_name: event_name, context: "", created_at: 1.week.ago) }
+    let!(:outbox_record_1) { OutboxEntry.create(event_name:, context: "", created_at: Time.current) }
+    let!(:outbox_record_2) { OutboxEntry.create(event_name:, context: "", created_at: 1.week.ago) }
     let(:event_name) { "example_resource_created" }
     let(:test_record_processor) do
       Class.new(RailsTransactionalOutbox::RecordProcessors::BaseProcessor) do
@@ -96,7 +96,7 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
 
           expect(error_handler.errors).to eq([error])
           expect(monitor).to have_received(:instrument).with("rails_transactional_outbox.error",
-            error: error, error_message: error.message)
+            error:, error_message: error.message)
         end
       end
 

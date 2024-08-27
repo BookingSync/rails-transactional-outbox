@@ -14,7 +14,7 @@ class RailsTransactionalOutbox
 
       scope :fetch_processable_for_causality_key, lambda { |batch_size, causality_key|
         processable_now
-          .where(causality_key: causality_key)
+          .where(causality_key:)
           .order(created_at: :asc)
           .limit(batch_size)
       }
@@ -23,6 +23,9 @@ class RailsTransactionalOutbox
         where(processed_at: nil)
           .where("retry_at IS NULL OR retry_at <= ?", Time.current)
       }
+
+      scope :processed_since, ->(time) { where("processed_at >= ?", time) }
+      scope :not_processed, -> { where(processed_at: nil) }
 
       def self.unprocessed_causality_keys(limit: RailsTransactionalOutbox.configuration.unprocessed_causality_keys_limit)
         processable_now
@@ -95,6 +98,12 @@ class RailsTransactionalOutbox
       model_klass.find(resource_id)
     rescue ActiveRecord::RecordNotFound
       model_klass.new(id: resource_id) if RailsTransactionalOutbox::EventType.new(event_type).destroy?
+    end
+
+    def processing_latency
+      return unless processed?
+
+      processed_at - created_at
     end
   end
 end

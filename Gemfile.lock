@@ -13,8 +13,11 @@ PATH
       activerecord (>= 5)
       activesupport (>= 3.2)
       concurrent-ruby
+      dogstatsd-ruby
       dry-monitor
       file-based-healthcheck
+      sidekiq (>= 5.0)
+      sidekiq-cron
       sigurd
       zeitwerk
 
@@ -33,6 +36,7 @@ GEM
       tzinfo (~> 2.0)
     ast (2.4.2)
     concurrent-ruby (1.1.10)
+    connection_pool (2.4.1)
     ddtrace (1.2.0)
       debase-ruby_core_source (= 0.10.16)
       libddprof (~> 0.6.0.1.0)
@@ -40,6 +44,7 @@ GEM
       msgpack
     debase-ruby_core_source (0.10.16)
     diff-lcs (1.5.0)
+    dogstatsd-ruby (4.8.3)
     dry-configurable (1.0.1)
       dry-core (~> 1.0, < 2)
       zeitwerk (~> 2.6)
@@ -53,10 +58,17 @@ GEM
       dry-configurable (~> 1.0, < 2)
       dry-core (~> 1.0, < 2)
       dry-events (~> 1.0, < 2)
+    et-orbi (1.2.11)
+      tzinfo
     exponential-backoff (0.0.4)
     ffi (1.15.5)
     file-based-healthcheck (0.2.0)
       activesupport (>= 3.2)
+    fugit (1.11.1)
+      et-orbi (~> 1, >= 1.2.11)
+      raabro (~> 1.4)
+    globalid (1.2.1)
+      activesupport (>= 6.1)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     json (2.6.2)
@@ -74,9 +86,13 @@ GEM
     parser (3.1.2.1)
       ast (~> 2.4.1)
     pg (1.4.3)
+    raabro (1.4.0)
+    rack (2.2.9)
     rainbow (3.1.1)
     rake (13.0.6)
     redis (4.8.0)
+    redis-namespace (1.11.0)
+      redis (>= 4)
     redlock (1.3.0)
       redis (>= 3.0.0, < 6.0)
     regexp_parser (2.5.0)
@@ -93,6 +109,11 @@ GEM
     rspec-mocks (3.11.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.11.0)
+    rspec-sidekiq (5.0.0)
+      rspec-core (~> 3.0)
+      rspec-expectations (~> 3.0)
+      rspec-mocks (~> 3.0)
+      sidekiq (>= 5, < 8)
     rspec-support (3.11.0)
     rubocop (1.35.1)
       json (~> 2.3)
@@ -116,6 +137,14 @@ GEM
     ruby-progressbar (1.11.0)
     sentry-ruby (5.4.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
+    sidekiq (6.5.12)
+      connection_pool (>= 2.2.5, < 3)
+      rack (~> 2.0)
+      redis (>= 4.5.0, < 5)
+    sidekiq-cron (1.12.0)
+      fugit (~> 1.8)
+      globalid (>= 1.0.1)
+      sidekiq (>= 6)
     sigurd (0.1.0)
       concurrent-ruby (~> 1)
       exponential-backoff
@@ -137,8 +166,10 @@ DEPENDENCIES
   pg
   rails-transactional-outbox!
   rake (~> 13.0)
+  redis-namespace
   redlock
   rspec (~> 3.0)
+  rspec-sidekiq
   rubocop
   rubocop-performance
   rubocop-rake

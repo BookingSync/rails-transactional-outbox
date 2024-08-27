@@ -9,6 +9,9 @@ require "crypt_keeper"
 require "sentry-ruby"
 require "redlock"
 require "rails-transactional-outbox"
+require "sidekiq/testing"
+require "rspec-sidekiq"
+require "redis-namespace"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

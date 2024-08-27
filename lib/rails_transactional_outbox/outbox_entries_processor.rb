@@ -9,8 +9,8 @@ class RailsTransactionalOutbox
       @config = config
     end
 
-    def call(&block)
-      config.outbox_entries_processor.call(&block)
+    def call(&)
+      config.outbox_entries_processor.call(&)
     end
   end
 end

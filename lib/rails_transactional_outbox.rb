@@ -6,6 +6,9 @@ require "dry-monitor"
 require "sigurd"
 require "concurrent-ruby"
 require "file-based-healthcheck"
+require "datadog/statsd"
+require "sidekiq"
+require "sidekiq-cron"
 
 class RailsTransactionalOutbox
   def self.loader

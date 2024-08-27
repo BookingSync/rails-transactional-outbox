@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe RailsTransactionalOutbox::HealthCheck do
   let(:healthcheck_storage) do
-    FileBasedHealthcheck.new(directory: directory, filename: key, time_threshold: 120)
+    FileBasedHealthcheck.new(directory:, filename: key, time_threshold: 120)
   end
   let(:directory) { "/tmp" }
   let(:key) { "__rails_transactional__outbox_worker__running__hostname" }
