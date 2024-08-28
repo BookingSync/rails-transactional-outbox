@@ -9,7 +9,7 @@ GIT
 PATH
   remote: .
   specs:
-    rails-transactional-outbox (0.4.0)
+    rails-transactional-outbox (1.0.0)
       activerecord (>= 5)
       activesupport (>= 3.2)
       concurrent-ruby
@@ -48,10 +48,10 @@ GEM
     debase-ruby_core_source (3.3.1)
     diff-lcs (1.5.0)
     dogstatsd-ruby (4.8.3)
-    dry-configurable (1.0.1)
+    dry-configurable (1.2.0)
       dry-core (~> 1.0, < 2)
       zeitwerk (~> 2.6)
-    dry-core (1.0.0)
+    dry-core (1.0.1)
       concurrent-ruby (~> 1.0)
       zeitwerk (~> 2.6)
     dry-events (1.0.1)
@@ -157,7 +157,7 @@ GEM
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.2.0)
-    zeitwerk (2.6.12)
+    zeitwerk (2.6.17)
 
 PLATFORMS
   arm64-darwin-22

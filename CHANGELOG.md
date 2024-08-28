@@ -1,7 +1,9 @@
 ## [Unreleased]
 
-- add latency tracking ability via Datadog
-- Require Ruby >= 3.1
+## [1.0.0] - 2024-08-28
+
+- [Feature] add latency tracking ability via Datadog
+- [Breaking Change] Require Ruby >= 3.1
 
 ## [0.4.0] - 2024-01-25
 
