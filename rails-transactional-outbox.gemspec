@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description   = "An implementation of transactional outbox pattern to be used with Rails."
   spec.homepage      = "https://github.com/BookingSync/rails-transactional-outbox"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.1.0")
 
   # spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
@@ -33,10 +33,16 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activerecord", ">= 5"
   spec.add_dependency "activesupport", ">= 3.2"
   spec.add_dependency "concurrent-ruby"
+  spec.add_dependency "dogstatsd-ruby"
   spec.add_dependency "dry-monitor"
   spec.add_dependency "file-based-healthcheck"
+  spec.add_dependency "sidekiq", ">= 5.0"
+  spec.add_dependency "sidekiq-cron"
   spec.add_dependency "sigurd"
   spec.add_dependency "zeitwerk"
+
+  spec.add_development_dependency "redis-namespace"
+  spec.add_development_dependency "rspec-sidekiq"
 
   # For more information and examples about making a new gem, checkout our
   # guide at: https://bundler.io/guides/creating_gem.html

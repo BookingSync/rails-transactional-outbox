@@ -10,19 +10,19 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     let(:event_name) { "example_resource_created" }
 
     let!(:outbox_record_1) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.week.from_now, context: "")
+      OutboxEntry.create(event_name:, created_at: 1.week.from_now, context: "")
     end
     let!(:outbox_record_2) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.weeks.ago, context: "")
+      OutboxEntry.create(event_name:, created_at: 2.weeks.ago, context: "")
     end
     let!(:outbox_record_3) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "")
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "")
     end
     let!(:outbox_record_4) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "")
+      OutboxEntry.create(event_name:, created_at: 2.year.ago, processed_at: 1.year.ago, context: "")
     end
     let!(:outbox_record_5) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "")
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "")
     end
 
     before do
@@ -62,26 +62,26 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     let(:causality_key) { "some_causality_key" }
 
     let!(:outbox_record_1) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.week.from_now, context: "",
-        causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 1.week.from_now, context: "",
+        causality_key:)
     end
     let!(:outbox_record_2) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.weeks.ago, context: "", causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 2.weeks.ago, context: "", causality_key:)
     end
     let!(:outbox_record_3) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "",
-        causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "",
+        causality_key:)
     end
     let!(:outbox_record_4) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "",
-        causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 2.year.ago, processed_at: 1.year.ago, context: "",
+        causality_key:)
     end
     let!(:outbox_record_5) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "",
-        causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "",
+        causality_key:)
     end
     let!(:outbox_record_6) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.months.ago, context: "", causality_key: "other")
+      OutboxEntry.create(event_name:, created_at: 2.months.ago, context: "", causality_key: "other")
     end
 
     before do
@@ -102,19 +102,19 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     let(:event_name) { "example_resource_created" }
 
     let!(:outbox_record_1) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.week.from_now, context: "")
+      OutboxEntry.create(event_name:, created_at: 1.week.from_now, context: "")
     end
     let!(:outbox_record_2) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.weeks.ago, context: "")
+      OutboxEntry.create(event_name:, created_at: 2.weeks.ago, context: "")
     end
     let!(:outbox_record_3) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "")
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "")
     end
     let!(:outbox_record_4) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "")
+      OutboxEntry.create(event_name:, created_at: 2.year.ago, processed_at: 1.year.ago, context: "")
     end
     let!(:outbox_record_5) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "")
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "")
     end
 
     before do
@@ -128,6 +128,43 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     end
   end
 
+  describe ".processed_since", :freeze_time do
+    subject(:processed_since) { OutboxEntry.processed_since(time).to_a }
+
+    let(:time) { Time.current }
+
+    let(:event_name) { "example_resource_created" }
+    let(:causality_key) { "some_causality_key" }
+
+    let!(:outbox_record_1) do
+      OutboxEntry.create(event_name:, processed_at: 1.week.from_now, context: "",
+        causality_key:)
+    end
+    let!(:outbox_record_2) do
+      OutboxEntry.create(event_name:, processed_at: time, context: "",
+        causality_key:)
+    end
+    let!(:outbox_record_3) do
+      OutboxEntry.create(event_name:, processed_at: 1.week.ago, context: "",
+        causality_key:)
+    end
+
+    it { is_expected.to contain_exactly(outbox_record_1, outbox_record_2) }
+  end
+
+  describe ".not_processed" do
+    subject(:not_processed) { OutboxEntry.not_processed.to_a }
+
+    let!(:outbox_record_1) do
+      OutboxEntry.create(event_name: "", processed_at: 1.week.from_now, context: "", causality_key: "")
+    end
+    let!(:outbox_record_2) do
+      OutboxEntry.create(event_name: "", processed_at: nil, context: "", causality_key: "")
+    end
+
+    it { is_expected.to contain_exactly(outbox_record_2) }
+  end
+
   describe ".unprocessed_causality_keys" do
     subject(:unprocessed_causality_keys) { OutboxEntry.unprocessed_causality_keys }
 
@@ -135,29 +172,29 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     let(:causality_key) { "some_causality_key" }
 
     let!(:outbox_record_1) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.week.from_now, context: "",
-        causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 1.week.from_now, context: "",
+        causality_key:)
     end
     let!(:outbox_record_2) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.weeks.ago, context: "", causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 2.weeks.ago, context: "", causality_key:)
     end
     let!(:outbox_record_3) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "",
-        causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "",
+        causality_key:)
     end
     let!(:outbox_record_4) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "",
-        causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 2.year.ago, processed_at: 1.year.ago, context: "",
+        causality_key:)
     end
     let!(:outbox_record_5) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "",
-        causality_key: causality_key)
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "",
+        causality_key:)
     end
     let!(:outbox_record_6) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.months.ago, context: "", causality_key: "other")
+      OutboxEntry.create(event_name:, created_at: 2.months.ago, context: "", causality_key: "other")
     end
     let!(:outbox_record_7) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.months.ago, context: "",
+      OutboxEntry.create(event_name:, created_at: 2.months.ago, context: "",
         causality_key: "other_processed", processed_at: 1.day.ago)
     end
 
@@ -194,15 +231,15 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     let(:event_name) { "example_resource_created" }
 
     let!(:outbox_record_1) do
-      OutboxEntry.create(event_name: event_name, created_at: 2.year.ago, processed_at: 1.year.ago, context: "")
+      OutboxEntry.create(event_name:, created_at: 2.year.ago, processed_at: 1.year.ago, context: "")
     end
     let!(:outbox_record_2) do
-      OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "")
+      OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.day.from_now, context: "")
     end
 
     context "when there are some records to process" do
       let!(:outbox_record_3) do
-        OutboxEntry.create(event_name: event_name, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "")
+        OutboxEntry.create(event_name:, created_at: 1.month.ago, retry_at: 1.minute.ago, context: "")
       end
 
       before do
@@ -256,13 +293,13 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
       let(:changeset) { { "id" => 1, "name" => "name" } }
 
       context "when it handles it as jsonb" do
-        let(:outbox_record) { OutboxEntry.new(changeset: changeset) }
+        let(:outbox_record) { OutboxEntry.new(changeset:) }
 
         it { is_expected.to eq changeset.symbolize_keys }
       end
 
       context "when it handles it as encrypted text" do
-        let(:outbox_record) { OutboxWithEncryptionEntry.new(changeset: changeset) }
+        let(:outbox_record) { OutboxWithEncryptionEntry.new(changeset:) }
 
         it { is_expected.to eq changeset.symbolize_keys }
       end
@@ -276,13 +313,13 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
       let(:arguments) { { "id" => 1, "name" => "name" } }
 
       context "when it handles it as jsonb" do
-        let(:outbox_record) { OutboxEntry.new(arguments: arguments) }
+        let(:outbox_record) { OutboxEntry.new(arguments:) }
 
         it { is_expected.to eq arguments.symbolize_keys }
       end
 
       context "when it handles it as encrypted text" do
-        let(:outbox_record) { OutboxWithEncryptionEntry.new(arguments: arguments) }
+        let(:outbox_record) { OutboxWithEncryptionEntry.new(arguments:) }
 
         it { is_expected.to eq arguments.symbolize_keys }
       end
@@ -292,7 +329,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
   describe "#processed?" do
     subject(:processed?) { outbox_record.processed? }
 
-    let(:outbox_record) { OutboxEntry.new(processed_at: processed_at) }
+    let(:outbox_record) { OutboxEntry.new(processed_at:) }
 
     context "when processed_at is present" do
       let(:processed_at) { Time.current }
@@ -310,7 +347,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
   describe "#failed?" do
     subject(:failed?) { outbox_record.failed? }
 
-    let(:outbox_record) { OutboxEntry.new(failed_at: failed_at) }
+    let(:outbox_record) { OutboxEntry.new(failed_at:) }
 
     context "when failed_at is present" do
       let(:failed_at) { Time.current }
@@ -328,7 +365,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
   describe "#handle_error", :freeze_time do
     subject(:handle_error) { outbox_record.handle_error(error) }
 
-    let(:outbox_record) { OutboxEntry.new(attempts: attempts) }
+    let(:outbox_record) { OutboxEntry.new(attempts:) }
     let(:error) { StandardError.new("some error") }
 
     describe "general behavior" do
@@ -414,7 +451,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
   describe "#event_type" do
     subject(:event_type) { outbox_record.event_type }
 
-    let(:outbox_record) { OutboxEntry.new(event_name: event_name) }
+    let(:outbox_record) { OutboxEntry.new(event_name:) }
 
     context "when event_name is ends_with _created suffix" do
       let(:event_name) { "resource_created" }
@@ -450,7 +487,7 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
   describe "#infer_model", :require_outbox_model do
     subject(:infer_model) { record.infer_model }
 
-    let(:record) { OutboxEntry.new(resource_class: "User", resource_id: user_id, event_name: event_name) }
+    let(:record) { OutboxEntry.new(resource_class: "User", resource_id: user_id, event_name:) }
     let!(:user) { User.create!(name: "name") }
     let(:user_id) { user.id }
     let(:event_name) { "resource_created" }
@@ -473,6 +510,26 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
       context "when the event type is not :destroy" do
         it { is_expected.to be_nil }
       end
+    end
+  end
+
+  describe "#processing_latency", :freeze_time do
+    subject(:processing_latency) { outbox_record.processing_latency }
+
+    let(:outbox_record) { OutboxEntry.new(created_at:, processed_at:) }
+    let(:created_at) { 1.day.ago }
+    let(:processed_at) { 1.hour.ago }
+
+    context "when processed" do
+      let(:processed_at) { 1.hour.ago }
+
+      it { is_expected.to eq 82_800 }
+    end
+
+    context "when not processed" do
+      let(:processed_at) { nil }
+
+      it { is_expected.to be_nil }
     end
   end
 end

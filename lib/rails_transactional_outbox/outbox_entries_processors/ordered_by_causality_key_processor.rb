@@ -7,12 +7,12 @@ class RailsTransactionalOutbox
 
       delegate :lock_client, :lock_expiry_time, to: :config
 
-      def execute(&block)
+      def execute(&)
         unprocessed_causality_keys.each_with_object([]) do |causality_key, processed_records|
           lock_client.lock(lock_name(causality_key), lock_expiry_time) do |locked|
             next unless locked
 
-            processed_records.concat(fetch_records(causality_key).tap { |records| process_records(records, &block) })
+            processed_records.concat(fetch_records(causality_key).tap { |records| process_records(records, &) })
           end
         end
       end

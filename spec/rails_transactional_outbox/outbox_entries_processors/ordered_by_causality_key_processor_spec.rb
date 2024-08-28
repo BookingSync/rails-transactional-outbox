@@ -7,12 +7,12 @@ RSpec.describe RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausa
     subject(:call) { described_class.new.call }
 
     let!(:outbox_record_1) do
-      OutboxEntry.create(event_name: event_name, context: "", processed_at: processed_at_1, created_at: Time.current,
+      OutboxEntry.create(event_name:, context: "", processed_at: processed_at_1, created_at: Time.current,
         error_class: "StandardError", error_message: "message", failed_at: 1.week.ago,
         retry_at: 1.week.ago, causality_key: "causality_key_1")
     end
     let!(:outbox_record_2) do
-      OutboxEntry.create(event_name: event_name, context: "", processed_at: processed_at_2, created_at: 1.week.ago,
+      OutboxEntry.create(event_name:, context: "", processed_at: processed_at_2, created_at: 1.week.ago,
         causality_key: "causality_key_2")
     end
     let(:event_name) { "example_resource_created" }

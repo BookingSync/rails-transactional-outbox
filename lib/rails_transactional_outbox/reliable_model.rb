@@ -29,20 +29,20 @@ class RailsTransactionalOutbox
         reliable_after_commit_callbacks << ReliableCallback.new(callback_proc, final_options)
       end
 
-      def self.reliable_after_create_commit(method_name = NOT_PROVIDED, options = {}, &block)
-        reliable_after_commit(method_name, options.merge(on: :create), &block)
+      def self.reliable_after_create_commit(method_name = NOT_PROVIDED, options = {}, &)
+        reliable_after_commit(method_name, options.merge(on: :create), &)
       end
 
-      def self.reliable_after_update_commit(method_name = NOT_PROVIDED, options = {}, &block)
-        reliable_after_commit(method_name, options.merge(on: :update), &block)
+      def self.reliable_after_update_commit(method_name = NOT_PROVIDED, options = {}, &)
+        reliable_after_commit(method_name, options.merge(on: :update), &)
       end
 
-      def self.reliable_after_destroy_commit(method_name = NOT_PROVIDED, options = {}, &block)
-        reliable_after_commit(method_name, options.merge(on: :destroy), &block)
+      def self.reliable_after_destroy_commit(method_name = NOT_PROVIDED, options = {}, &)
+        reliable_after_commit(method_name, options.merge(on: :destroy), &)
       end
 
-      def self.reliable_after_save_commit(method_name = NOT_PROVIDED, options = {}, &block)
-        reliable_after_commit(method_name, options.merge(on: %i[create update]), &block)
+      def self.reliable_after_save_commit(method_name = NOT_PROVIDED, options = {}, &)
+        reliable_after_commit(method_name, options.merge(on: %i[create update]), &)
       end
 
       alias_method :original_previous_changes, :previous_changes

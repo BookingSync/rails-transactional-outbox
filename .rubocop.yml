@@ -9,7 +9,7 @@ inherit_mode:
 
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.1
   Exclude:
     - "db/**/*"
     - "bin/**/*"
@@ -147,6 +147,7 @@ Lint/ConstantDefinitionInBlock:
 RSpec/AnyInstance:
   Exclude:
     - 'spec/rails_transactional_outbox/outbox_model_spec.rb'
+    - 'spec/rails_transactional_outbox/datadog_latency_reporter_job_spec.rb'
 
 RSpec/VerifiedDoubles:
   Exclude:

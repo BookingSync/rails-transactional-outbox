@@ -10,17 +10,17 @@ class RailsTransactionalOutbox
         @config = config
       end
 
-      def call(&block)
+      def call(&)
         return [] unless outbox_model.any_records_to_process?
 
-        execute(&block)
+        execute(&)
       end
 
       private
 
       delegate :outbox_model, :outbox_batch_size, to: :config
 
-      def execute(&_block)
+      def execute(&)
         raise "implement me"
       end
 

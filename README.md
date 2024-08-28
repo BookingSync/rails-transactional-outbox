@@ -46,6 +46,9 @@ Rails.application.config.to_prepare do
     config.outbox_entries_processor = `RailsTransactionalOutbox::OutboxEntriesProcessors::OrderedByCausalityKeyProcessor`.new # not required, defaults to RailsTransactionalOutbox::OutboxEntriesProcessors::NonOrderedProcessor.new
     config.outbox_entry_causality_key_resolver = ->(model) { model.tenant_id } # not required, defaults to a lambda returning nil. Needed when using `outbox_entry_causality_key_resolver`
     config.unprocessed_causality_keys_limit = 100_000 # not required, defaults to 10_000. Might be a good idea to decrease the value when you start experiencing OOMs - they are likely to be caused by fetching too many causality keys. It is likely to happen when you have huge amount of records to process.
+
+    config.datadog_statsd_client = Datadog::Statsd.new("localhost", 8125, namespace: "application_name.production") # needed only for latency tracking, defaults to `nil`
+    config.high_priority_sidekiq_queue = :critical # not required, defaults to `:rails_transactional_outbox_high_priority`
   end
 end
 ```
@@ -247,10 +250,40 @@ tartarus.register do |item|
 end
 ```
 
+### Outbox Processing Latency Tracking
+
+It's highly recommended to tracking latency of processing outbox records defined as the difference between the `processed` and `created_at` timestamps.
+
+``` rb
+RailsTransactionalOutbox.configure do |config|
+  config.datadog_statsd_client = Datadog::Statsd.new("localhost", 8125, namespace: "application_name.production") # required for latency tracking, defaults to `nil`
+  config.high_priority_sidekiq_queue = :critical # not required, defaults to `:rails_transactional_outbox_high_priority`
+end
+```
+
+You also need to add a job to the sidekiq-cron schedule that will run every 1 minute:
+
+``` rb
+Sidekiq.configure_server do |config|
+  config.on(:startup) do
+    RailsTransactionalOutbox::DatadogLatencyReporterScheduler.new.add_to_schedule
+  end
+end
+```
+
+With this setup, you will have the following metrics available on DataDog:
+
+- `"#{namespace}.rails_transactional_outbox.latency.minimum"`
+- `"#{namespace}.rails_transactional_outbox.latency.maximum"`
+- `"#{namespace}.rails_transactional_outbox.latency.average"`
+- `"#{namespace}.rails_transactional_outbox.latency.highest_since_creation_date`
+
+
+
 ### Health Checks
 
 
-Then, Uou need to explicitly enable the health check (e.g. in the initializer):
+You need to explicitly enable the health check (e.g. in the initializer):
 
 ``` rb
 RailsTransactionalOutbox.enable_outbox_worker_healthcheck

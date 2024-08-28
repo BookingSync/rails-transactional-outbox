@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+- add latency tracking ability via Datadog
+- Require Ruby >= 3.1
+
 ## [0.4.0] - 2024-01-25
 
 - add config option to specify causality keys limit

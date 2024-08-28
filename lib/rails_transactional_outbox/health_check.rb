@@ -7,7 +7,7 @@ class RailsTransactionalOutbox
     private_constant :KEY_PREFIX, :TMP_DIR
 
     def self.check(hostname: ENV.fetch("HOSTNAME", nil), expiry_time_in_seconds: 120)
-      new(hostname: hostname, expiry_time_in_seconds: expiry_time_in_seconds).check
+      new(hostname:, expiry_time_in_seconds:).check
     end
 
     attr_reader :hostname, :expiry_time_in_seconds

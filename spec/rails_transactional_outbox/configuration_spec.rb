@@ -314,4 +314,36 @@ RSpec.describe RailsTransactionalOutbox::Configuration do
       it { is_expected.to eq 10_000 }
     end
   end
+
+  describe "#datadog_statsd_client/datadog_statsd_client=" do
+    subject(:datadog_statsd_client) { config.datadog_statsd_client }
+
+    let(:config) { described_class.new }
+
+    context "when datadog_statsd_client is not specified" do
+      it { is_expected.to be_nil }
+    end
+
+    context "when datadog_statsd_client is specified" do
+      before { config.datadog_statsd_client = "datadog_statsd_client" }
+
+      it { is_expected.to eq "datadog_statsd_client" }
+    end
+  end
+
+  describe "#high_priority_sidekiq_queue/high_priority_sidekiq_queue=" do
+    subject(:high_priority_sidekiq_queue) { config.high_priority_sidekiq_queue }
+
+    let(:config) { described_class.new }
+
+    context "when high_priority_sidekiq_queue is not specified" do
+      it { is_expected.to eq :rails_transactional_outbox_high_priority }
+    end
+
+    context "when high_priority_sidekiq_queue is specified" do
+      before { config.high_priority_sidekiq_queue = :critical }
+
+      it { is_expected.to eq :critical }
+    end
+  end
 end
