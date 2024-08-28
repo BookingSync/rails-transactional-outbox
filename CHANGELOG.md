@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- add latency tracking ability via Datadog
+
 ## [0.4.0] - 2024-01-25
 
 - add config option to specify causality keys limit
