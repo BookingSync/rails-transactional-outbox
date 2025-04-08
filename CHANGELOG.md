@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Require Ruby >= 3.2
+
 ## [1.1.0] - 2025-04-08
 
 - Make gem compatible with Datadog gem 2.0
