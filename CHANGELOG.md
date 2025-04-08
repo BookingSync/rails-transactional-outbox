@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.1.0] - 2025-04-08
+
 - Make gem compatible with Datadog gem 2.0
 
 ## [1.0.0] - 2024-08-28
