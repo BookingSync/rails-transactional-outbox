@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Make gem compatible with Datadog gem 2.0
+
 ## [1.0.0] - 2024-08-28
 
 - [Feature] add latency tracking ability via Datadog

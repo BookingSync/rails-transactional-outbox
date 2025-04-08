@@ -2,7 +2,7 @@
 
 require "bundler/setup"
 require "support/is_expected_block"
-require "ddtrace"
+require "datadog"
 require "timecop"
 require "active_record"
 require "crypt_keeper"

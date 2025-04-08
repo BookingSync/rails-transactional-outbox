@@ -36,7 +36,7 @@ RSpec.describe RailsTransactionalOutbox::Tracers::DatadogTracer do
       trace
 
       expect(dd_tracer).to have_received(:trace).with(event_name,
-        hash_including(service: "rails_transactional_outbox_worker", span_type: "worker", on_error: anything))
+        hash_including(service: "rails_transactional_outbox_worker", type: "worker", on_error: anything))
     end
 
     it "yields" do
