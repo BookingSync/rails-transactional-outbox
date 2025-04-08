@@ -37,15 +37,13 @@ GEM
     ast (2.4.2)
     concurrent-ruby (1.1.10)
     connection_pool (2.4.1)
-    datadog-ci (0.8.3)
+    datadog (2.14.0)
+      datadog-ruby_core_source (~> 3.4)
+      libdatadog (~> 16.0.1.1.0)
+      libddwaf (~> 1.21.0.0.1)
+      logger
       msgpack
-    ddtrace (1.23.3)
-      datadog-ci (~> 0.8.1)
-      debase-ruby_core_source (= 3.3.1)
-      libdatadog (~> 7.0.0.1.0)
-      libddwaf (~> 1.14.0.0.0)
-      msgpack
-    debase-ruby_core_source (3.3.1)
+    datadog-ruby_core_source (3.4.0)
     diff-lcs (1.5.0)
     dogstatsd-ruby (4.8.3)
     dry-configurable (1.2.0)
@@ -64,9 +62,9 @@ GEM
     et-orbi (1.2.11)
       tzinfo
     exponential-backoff (0.0.4)
-    ffi (1.17.0-arm64-darwin)
-    ffi (1.17.0-x86_64-darwin)
-    ffi (1.17.0-x86_64-linux-gnu)
+    ffi (1.17.1-arm64-darwin)
+    ffi (1.17.1-x86_64-darwin)
+    ffi (1.17.1-x86_64-linux-gnu)
     file-based-healthcheck (0.2.0)
       activesupport (>= 3.2)
     fugit (1.11.1)
@@ -77,16 +75,17 @@ GEM
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     json (2.6.2)
-    libdatadog (7.0.0.1.0)
-    libdatadog (7.0.0.1.0-x86_64-linux)
-    libddwaf (1.14.0.0.0-arm64-darwin)
+    libdatadog (16.0.1.1.0)
+    libdatadog (16.0.1.1.0-x86_64-linux)
+    libddwaf (1.21.0.0.1-arm64-darwin)
       ffi (~> 1.0)
-    libddwaf (1.14.0.0.0-x86_64-darwin)
+    libddwaf (1.21.0.0.1-x86_64-darwin)
       ffi (~> 1.0)
-    libddwaf (1.14.0.0.0-x86_64-linux)
+    libddwaf (1.21.0.0.1-x86_64-linux)
       ffi (~> 1.0)
+    logger (1.7.0)
     minitest (5.16.3)
-    msgpack (1.7.2)
+    msgpack (1.8.0)
     parallel (1.22.1)
     parser (3.1.2.1)
       ast (~> 2.4.1)
@@ -167,7 +166,7 @@ PLATFORMS
 
 DEPENDENCIES
   crypt_keeper!
-  ddtrace
+  datadog
   pg
   rails-transactional-outbox!
   rake (~> 13.0)

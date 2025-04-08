@@ -11,7 +11,7 @@ class RailsTransactionalOutbox
       end
 
       def trace(event_name)
-        tracer.trace(event_name, span_type: "worker", service: self.class.service_name,
+        tracer.trace(event_name, span_type_key => "worker", service: self.class.service_name,
           on_error: error_handler) do |_span|
           yield
         end
@@ -24,6 +24,14 @@ class RailsTransactionalOutbox
           Datadog.tracer
         else
           Datadog::Tracing
+        end
+      end
+
+      def span_type_key
+        if defined?(DDTrace)
+          :span_type
+        else
+          :type
         end
       end
 
