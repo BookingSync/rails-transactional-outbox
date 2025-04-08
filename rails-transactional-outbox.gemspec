@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description   = "An implementation of transactional outbox pattern to be used with Rails."
   spec.homepage      = "https://github.com/BookingSync/rails-transactional-outbox"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 3.1.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.2.0")
 
   # spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
