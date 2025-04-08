@@ -9,7 +9,7 @@ GIT
 PATH
   remote: .
   specs:
-    rails-transactional-outbox (1.1.0)
+    rails-transactional-outbox (1.2.0)
       activerecord (>= 5)
       activesupport (>= 3.2)
       concurrent-ruby
