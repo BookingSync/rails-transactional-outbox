@@ -7,18 +7,13 @@ RSpec.describe RailsTransactionalOutbox::DatadogLatencyReporterScheduler do
     subject(:add_to_schedule) { described_class.new.add_to_schedule }
 
     let(:redis_url) { ENV.fetch("REDIS_URL") }
-    let(:redis_namespace) { described_class.to_s }
+    let(:redis) { Redis.new(url: redis_url) }
 
     before do
       Sidekiq.configure_client do |config|
-        config.redis = { url: redis_url, namespace: redis_namespace }
+        config.redis = { url: redis_url }
       end
-      Sidekiq.redis do |sidekiq_connection|
-        sidekiq_connection.redis.flushdb
-        sidekiq_connection.keys("cron_job*").each do |key|
-          sidekiq_connection.del(key)
-        end
-      end
+      redis.flushdb
     end
 
     context "when the job already exists" do
