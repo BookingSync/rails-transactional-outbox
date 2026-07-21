@@ -86,7 +86,11 @@ class RailsTransactionalOutbox
     end
 
     def error
-      @error || error_class.constantize.new(error_message)
+      return @error if defined?(@error)
+
+      error_class.constantize.new(error_message)
+    rescue
+      RailsTransactionalOutbox::StoredError.new(error_class:, error_message:)
     end
 
     def event_type

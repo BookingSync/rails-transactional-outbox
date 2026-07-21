@@ -47,11 +47,11 @@ class RailsTransactionalOutbox
 
     def process_entries
       tracer.trace("rails_transactional_outbox_entries_processor") do
-        outbox_entries_processor.call do |record|
-          if record.failed?
+        outbox_entries_processor.call do |record, processing_error|
+          if processing_error
             instrument("rails_transactional_outbox.record_processing_failed", outbox_record: record)
             error("failed to process #{record.inspect}")
-            error_handler.capture_exception(record.error)
+            error_handler.capture_exception(processing_error)
           else
             debug("processed #{record.inspect}")
             instrument("rails_transactional_outbox.record_processed", outbox_record: record)
