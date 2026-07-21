@@ -104,12 +104,11 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
         before do
           allow(test_record_processor).to receive(:call).and_call_original
           allow(test_record_processor).to receive(:call).with(outbox_record_2).and_raise(error)
-          Thread.new { start }
-          sleep 0.5
-        end
-
-        after do
-          runner.stop
+          allow(RailsTransactionalOutbox::RunnerSleepInterval).to receive(:interval_for) do
+            runner.stop
+            0
+          end
+          start
         end
 
         it "does not raise the error but it reports the error" do
@@ -122,13 +121,11 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
 
     context "when no error happens" do
       before do
-        allow(RailsTransactionalOutbox::RunnerSleepInterval).to receive(:interval_for).and_call_original
-        Thread.new { start }
-        sleep 0.5
-      end
-
-      after do
-        runner.stop
+        allow(RailsTransactionalOutbox::RunnerSleepInterval).to receive(:interval_for) do
+          runner.stop
+          0
+        end
+        start
       end
 
       it "ensures that the database connection is established" do
