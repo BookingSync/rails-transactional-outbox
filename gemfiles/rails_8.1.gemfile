@@ -4,6 +4,6 @@ source "https://rubygems.org"
 
 gemspec path: ".."
 
-gem "crypt_keeper", github: "BookingSync/crypt_keeper_custom", branch: "support-rails-8-0"
 gem "activerecord", "~> 8.1.0"
+gem "crypt_keeper", github: "BookingSync/crypt_keeper_custom", branch: "support-rails-8-0"
 gem "railties", "~> 8.1.0"

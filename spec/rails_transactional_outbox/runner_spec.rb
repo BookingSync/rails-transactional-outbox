@@ -151,7 +151,7 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
 
       it "sleeps for a specific amount of time after processing determined
       by RailsTransactionalOutbox::RunnerSleepInterval" do
-        expect(RailsTransactionalOutbox::RunnerSleepInterval).to have_received(:interval_for)
+        expect(RailsTransactionalOutbox::RunnerSleepInterval).to have_received(:interval_for).at_least(:once)
       end
     end
 

@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-performance
   - rubocop-rspec
   - rubocop-rake
@@ -155,3 +155,21 @@ RSpec/VerifiedDoubles:
 
 Layout/LineLength:
   Max: 125
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+RSpec/IndexedLet:
+  Enabled: false
+
+RSpec/MatchArray:
+  Enabled: false
+
+RSpec/NoExpectationExample:
+  Enabled: false
+
+RSpec/SortMetadata:
+  Enabled: false
+
+Style/SymbolProc:
+  Enabled: false
