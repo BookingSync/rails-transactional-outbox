@@ -1,0 +1,9 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gemspec path: ".."
+
+gem "activerecord", "~> 8.0.0"
+gem "crypt_keeper", github: "BookingSync/crypt_keeper_custom", branch: "support-rails-8-0"
+gem "railties", "~> 8.0.0"

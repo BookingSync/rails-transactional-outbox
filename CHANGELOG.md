@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [1.2.1] - 2026-07-21
+
+- Safely represent persisted processing errors whose exception classes cannot be reconstructed from a message.
+
 ## [1.2.0] - 2025-04-08
 
 - Require Ruby >= 3.2

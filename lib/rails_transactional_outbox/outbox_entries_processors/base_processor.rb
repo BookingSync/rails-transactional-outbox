@@ -27,14 +27,16 @@ class RailsTransactionalOutbox
       def process_records(records_to_process, &block)
         failed_records = []
         records_to_process.each do |record|
+          processing_error = nil
           begin
             process(record)
           rescue => e
+            processing_error = e
             record.handle_error(e)
             record.save!
             failed_records << record
           end
-          yield record if block
+          yield record, processing_error if block
         end
         processed_records = records_to_process - failed_records
         mark_as_processed(processed_records)

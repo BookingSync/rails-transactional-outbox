@@ -2,23 +2,24 @@ name: CI
 on: [pull_request, push]
 jobs:
   rubocop:
-    strategy:
-      fail-fast: true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
-          bundler-cache: true
+          ruby-version: 3.4
+          bundler: latest
+      - run: bundle install
       - run: bundle exec rubocop
   rspec:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3']
+        ruby: ['3.3', '3.4', '4.0']
+        rails: ['8.0', '8.1']
     runs-on: ubuntu-latest
     env:
+      BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
       DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/rails-transactional-outbox-test"
       POSTGRES_URL: "postgresql://postgres:postgres@127.0.0.1:5432"
     services:
@@ -41,9 +42,10 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
+          bundler: latest
+      - run: bundle install
       - run: bundle exec rake

@@ -446,6 +446,20 @@ RSpec.describe RailsTransactionalOutbox::OutboxModel do
     let(:outbox_record) { OutboxEntry.new(error_class: "StandardError", error_message: "error message") }
 
     it { is_expected.to eq StandardError.new("error message") }
+
+    context "when the stored error requires more than a message" do
+      let(:outbox_record) do
+        OutboxEntry.create!(event_name: "example_resource_created", context: "",
+          error_class: "ActiveRecord::RecordInvalid", error_message: "Validation failed: example")
+      end
+
+      it "does not raise while reconstructing the error" do
+        expect(error).to have_attributes(
+          error_class: "ActiveRecord::RecordInvalid",
+          error_message: "Validation failed: example"
+        )
+      end
+    end
   end
 
   describe "#event_type" do

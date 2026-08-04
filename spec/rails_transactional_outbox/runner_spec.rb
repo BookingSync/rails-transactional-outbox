@@ -104,12 +104,11 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
         before do
           allow(test_record_processor).to receive(:call).and_call_original
           allow(test_record_processor).to receive(:call).with(outbox_record_2).and_raise(error)
-          Thread.new { start }
-          sleep 0.5
-        end
-
-        after do
-          runner.stop
+          allow(RailsTransactionalOutbox::RunnerSleepInterval).to receive(:interval_for) do
+            runner.stop
+            0
+          end
+          start
         end
 
         it "does not raise the error but it reports the error" do
@@ -122,13 +121,11 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
 
     context "when no error happens" do
       before do
-        allow(RailsTransactionalOutbox::RunnerSleepInterval).to receive(:interval_for).and_call_original
-        Thread.new { start }
-        sleep 0.5
-      end
-
-      after do
-        runner.stop
+        allow(RailsTransactionalOutbox::RunnerSleepInterval).to receive(:interval_for) do
+          runner.stop
+          0
+        end
+        start
       end
 
       it "ensures that the database connection is established" do
@@ -151,7 +148,35 @@ RSpec.describe RailsTransactionalOutbox::Runner, :freeze_time do
 
       it "sleeps for a specific amount of time after processing determined
       by RailsTransactionalOutbox::RunnerSleepInterval" do
-        expect(RailsTransactionalOutbox::RunnerSleepInterval).to have_received(:interval_for)
+        expect(RailsTransactionalOutbox::RunnerSleepInterval).to have_received(:interval_for).at_least(:once)
+      end
+    end
+
+    context "when a failed entry succeeds on retry" do
+      let!(:outbox_record_2) do
+        OutboxEntry.create!(event_name:, context: "", created_at: 1.week.ago,
+          error_class: "ActiveRecord::RecordInvalid", error_message: "Validation failed: example",
+          failed_at: 1.hour.ago, retry_at: 1.minute.ago)
+      end
+
+      before do
+        allow(RailsTransactionalOutbox::RunnerSleepInterval).to receive(:interval_for) do
+          runner.stop
+          0
+        end
+      end
+
+      it "marks the entry processed without reporting the previous failure", :aggregate_failures do
+        expect { start }.not_to raise_error
+
+        expect(outbox_record_2.reload).to have_attributes(
+          processed_at: Time.current,
+          error_class: nil,
+          error_message: nil,
+          failed_at: nil,
+          retry_at: nil
+        )
+        expect(error_handler.errors).to be_empty
       end
     end
   end
